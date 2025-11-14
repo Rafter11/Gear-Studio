@@ -15,7 +15,7 @@
 
 @font-face {
     font-family: 'FHACondensedFrench';
-    src: url('../src/fonts/FHACondensedFrench.ttf') format('truetype');
+    src: url('..src/fonts/FHACondensedFrench.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
 }

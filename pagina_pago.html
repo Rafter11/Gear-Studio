@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Gear Studio — Pago</title>
-  <link rel="stylesheet" href="/css/estilos_pago.css" />
-  <link rel="stylesheet" href="/css/estilos_base.css">
+  <link rel="stylesheet" href="css/estilos_pago.css" />
+  <link rel="stylesheet" href="css/estilos_base.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 </head>
 
 <body>
   <div class="logo-superior-izquierda">
     <a href="index.html">
-      <img src="/src/img/Gear_Studio_Logo_black.png" alt="Gear Studio Logo" />
+      <img src="src/img/Gear_Studio_Logo_black.png" alt="Gear Studio Logo" />
     </a>
   </div>
 
@@ -19,7 +19,7 @@
   <div id="alert-container" class="alert-container"></div>
 
   <video autoplay muted loop id="video-fondo">
-    <source src="/src/video/Gears_login_video.mp4" type="video/mp4" />
+    <source src="src/video/Gears_login_video.mp4" type="video/mp4" />
   </video>
   <div class="video-overlay"></div>
 
@@ -135,7 +135,7 @@
       `;
 
       const imagen = document.getElementById('imagen-juego');
-      imagen.src = juego.imagen_url || '/src/img/default_game.jpg';
+      imagen.src = juego.imagen_url || 'src/img/default_game.jpg';
 
       const { data: metodos } = await client.from('metodopago').select('*').eq('id_usuario', user.id);
       const select = document.getElementById('metodo-pago');

@@ -5,15 +5,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gear Studio — Biblioteca</title>
-  <link rel="stylesheet" href="/css/estilos_biblioteca.css" />
-  <link rel="stylesheet" href="/css/estilos_base.css">
+  <link rel="stylesheet" href="css/estilos_biblioteca.css" />
+  <link rel="stylesheet" href="css/estilos_base.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 </head>
 
 <body>
   <!-- Fondo de video -->
   <video autoplay muted loop id="video-fondo">
-    <source src="/src/video/Gears_login_video.mp4" type="video/mp4" />
+    <source src="src/video/Gears_login_video.mp4" type="video/mp4" />
   </video>
   <div class="video-overlay"></div>
 
@@ -23,7 +23,7 @@
   <!-- Logo y usuario -->
   <div class="logo-superior-izquierda">
     <a href="/html/index.html">
-      <img src="/src/img/Gear_Studio_Logo_black.png" alt="Logo Gear Studio" />
+      <img src="src/img/Gear_Studio_Logo_black.png" alt="Logo Gear Studio" />
     </a>
   </div>
 
@@ -170,7 +170,7 @@
         const tarjeta = document.createElement('div');
         tarjeta.className = 'juego-card';
         tarjeta.innerHTML = `
-          <img src="${juego.imagen_url || '/src/img/default_game.jpg'}" alt="${juego.nombre}" />
+          <img src="${juego.imagen_url || 'src/img/default_game.jpg'}" alt="${juego.nombre}" />
           <h3>${juego.nombre}</h3>
           <p>${juego.desarrollador}</p>
           <p><strong>${juego.precio} €</strong></p>
@@ -297,7 +297,7 @@
         const tarjeta = document.createElement('div');
         tarjeta.className = 'juego-card';
         tarjeta.innerHTML = `
-        <img src="${juego.imagen_url || '/src/img/default_game.jpg'}" alt="${juego.nombre}" />
+        <img src="${juego.imagen_url || 'src/img/default_game.jpg'}" alt="${juego.nombre}" />
         <h3>${juego.nombre}</h3>
         <p>${juego.desarrollador}</p>
         <p><strong>${juego.precio} €</strong></p>

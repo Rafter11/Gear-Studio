@@ -74,7 +74,7 @@ html, body {
   box-sizing: border-box;
   border-width: 24px;
   border-style: solid;
-  border-image-source: url("../src/img/login_border.png");
+  border-image-source: url("..src/img/login_border.png");
   border-image-slice: 30 fill;
   border-image-repeat: stretch;
   background: linear-gradient(135deg, #D9976F, #C08B51);
