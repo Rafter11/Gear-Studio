@@ -5,11 +5,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gear Studio — Página Principal</title>
-  <link rel="stylesheet" href="../css/estilos_principal.css" />
+  <link rel="stylesheet" href="/css/estilos_principal.css" />
+  <link rel="stylesheet" href="/css/estilos_base.css">
   <style>
     @font-face {
       font-family: 'FHACondensedFrench';
-      src: url('../src/fonts/FHACondensedFrench.ttf') format('truetype');
+      src: url('/src/fonts/FHACondensedFrench.ttf') format('truetype');
       font-weight: normal;
       font-style: normal;
     }
@@ -19,13 +20,16 @@
 
 <body>
   <video autoplay muted loop id="video-fondo">
-    <source src="../src/video/Gears_login_video.mp4" type="video/mp4" />
+    <source src="/src/video/Gears_login_video.mp4" type="video/mp4" />
   </video>
   <div class="video-overlay"></div>
 
+  <!-- Contenedor de alertas personalizadas -->
+  <div id="alert-container" class="alert-container"></div>
+
   <div class="logo-superior-izquierda">
     <a href="/html/index.html">
-      <img src="../src/img/Gear_Studio_Logo_black.png" alt="Logo Gear Studio" />
+      <img src="/src/img/Gear_Studio_Logo_black.png" alt="Logo Gear Studio" />
     </a>
   </div>
 
@@ -42,7 +46,7 @@
     <button onclick="location.href='pagina_chats.html'">Chats</button>
     <button onclick="location.href='pagina_biblioteca.html'">Biblioteca</button>
     <button onclick="location.href='pagina_usuarios.html'">Amigos</button>
-    <button>Juego aleatorio</button>
+    <button onclick="juegoAleatorio()">Juego aleatorio</button>
     <input type="text" id="busqueda-nombre" placeholder="Buscar por nombre">
   </nav>
 
@@ -151,6 +155,46 @@
 
   <script>
     const client = supabase.createClient('https://ohjqmljmvufluqffhdye.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9oanFtbGptdnVmbHVxZmZoZHllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAzNTcyMDIsImV4cCI6MjA3NTkzMzIwMn0.16Ii3f1iICoVlA6_ZGLfnVBQjj3MCFhK4os0Rpy_kX0');
+    
+    // Función para mostrar alertas personalizadas
+    function showAlert(message, type = 'info', duration = 4000) {
+      let container = document.getElementById('alert-container');
+      if (!container) {
+        container = document.createElement('div');
+        container.id = 'alert-container';
+        container.className = 'alert-container';
+        document.body.appendChild(container);
+      }
+
+      const alert = document.createElement('div');
+      alert.className = `alert ${type}`;
+      
+      const messageSpan = document.createElement('span');
+      messageSpan.textContent = message;
+      messageSpan.style.flex = '1';
+      
+      const closeBtn = document.createElement('button');
+      closeBtn.className = 'close-alert';
+      closeBtn.innerHTML = '×';
+      closeBtn.onclick = () => {
+        alert.style.animation = 'fadeOutAlert 0.4s ease-in forwards';
+        setTimeout(() => alert.remove(), 400);
+      };
+      
+      alert.appendChild(messageSpan);
+      alert.appendChild(closeBtn);
+      container.appendChild(alert);
+
+      setTimeout(() => {
+        if (alert.parentElement) {
+          alert.style.animation = 'fadeOutAlert 0.4s ease-in forwards';
+          setTimeout(() => {
+            if (alert.parentElement) alert.remove();
+          }, 400);
+        }
+      }, duration);
+    }
+    
     let juegoActualId = null;
     let juegosMap = {};
     let esAdmin = false; // global
@@ -187,7 +231,7 @@
       if (archivo) {
         const nombreArchivo = `${user.id}_${Date.now()}.${archivo.name.split('.').pop()}`;
         const { error: uploadError } = await client.storage.from('fotos_perfil').upload(nombreArchivo, archivo, { cacheControl: '3600', upsert: true });
-        if (uploadError) return alert("Error al subir la foto: " + uploadError.message);
+        if (uploadError) return showAlert("Error al subir la foto: " + uploadError.message, 'error', 3000);
         const { data } = client.storage.from('fotos_perfil').getPublicUrl(nombreArchivo);
         nuevaUrlFoto = data.publicUrl;
       }
@@ -366,13 +410,13 @@
       const comentario = document.getElementById('reseña-comentario').value.trim();
 
       if (!juegoActualId || !puntuacion || !comentario) {
-        alert("Faltan datos para enviar la reseña");
+        showAlert("Faltan datos para enviar la reseña", 'warning', 3000);
         return;
       }
 
       const { data: { user }, error: userError } = await client.auth.getUser();
       if (userError || !user) {
-        alert("No se pudo obtener el usuario actual");
+        showAlert("No se pudo obtener el usuario actual", 'error', 3000);
         return;
       }
 
@@ -387,11 +431,11 @@
         }]);
 
       if (insertError) {
-        alert("Error al guardar la reseña: " + insertError.message);
+        showAlert("Error al guardar la reseña: " + insertError.message, 'error', 3000);
         return;
       }
 
-      alert("¡Reseña enviada con éxito!");
+      showAlert("¡Reseña enviada con éxito!", 'success', 3000);
       document.getElementById('form-reseña').reset();
     });
 
@@ -534,7 +578,7 @@
           .from('juegos')
           .upload(nombreArchivo, archivo, { cacheControl: '3600', upsert: true });
         if (uploadError) {
-          alert("Error al subir la imagen: " + uploadError.message);
+          showAlert("Error al subir la imagen: " + uploadError.message, 'error', 3000);
           return;
         }
         const { data } = client.storage.from('juegos').getPublicUrl(nombreArchivo);
@@ -553,9 +597,9 @@
         .eq('id_juego', juegoEditando);
 
       if (error) {
-        alert("Error al actualizar: " + error.message);
+        showAlert("Error al actualizar: " + error.message, 'error', 3000);
       } else {
-        alert("Juego actualizado correctamente.");
+        showAlert("Juego actualizado correctamente.", 'success', 2000);
         cerrarModalEditar();
         cargarJuegos();
       }
@@ -580,7 +624,7 @@
           .from('juegos')
           .upload(nombreArchivo, archivo, { cacheControl: '3600', upsert: true });
         if (uploadError) {
-          alert("Error al subir la imagen: " + uploadError.message);
+          showAlert("Error al subir la imagen: " + uploadError.message, 'error', 3000);
           return;
         }
         const { data } = client.storage.from('juegos').getPublicUrl(nombreArchivo);
@@ -592,15 +636,15 @@
         descripcion: document.getElementById('nuevo-descripcion').value.trim(),
         precio: parseFloat(document.getElementById('nuevo-precio').value),
         desarrollador: document.getElementById('nuevo-desarrollador').value.trim(),
-        imagen_url: imagen_url
+        imagen_url: nuevaImagenUrl
       }]);
 
       if (error) {
-        alert("Error al añadir juego: " + error.message);
+        showAlert("Error al añadir juego: " + error.message, 'error', 3000);
         return;
       }
 
-      alert("Juego añadido correctamente.");
+      showAlert("Juego añadido correctamente.", 'success', 2000);
       cerrarModalNuevoJuego();
       cargarJuegos();
     });
@@ -608,6 +652,20 @@
     cargarCategorias();
     mostrarUsuario();
     cargarNotificacionesUsuario();
+
+    async function juegoAleatorio() {
+      const { data: juegos, error } = await client
+        .from('juego')
+        .select('id_juego, nombre, descripcion, precio, imagen_url, desarrollador');
+
+      if (error || !juegos || juegos.length === 0) {
+        showAlert("No hay juegos disponibles", 'warning', 3000);
+        return;
+      }
+
+      const juegoRandom = juegos[Math.floor(Math.random() * juegos.length)];
+      abrirModalCompra(juegoRandom.id_juego);
+    }
   </script>
 </body>
 

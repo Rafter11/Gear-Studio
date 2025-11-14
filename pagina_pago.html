@@ -3,19 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <title>Gear Studio — Pago</title>
-  <link rel="stylesheet" href="../css/estilos_pago.css" />
+  <link rel="stylesheet" href="/css/estilos_pago.css" />
+  <link rel="stylesheet" href="/css/estilos_base.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 </head>
 
 <body>
   <div class="logo-superior-izquierda">
     <a href="index.html">
-      <img src="../src/img/Gear_Studio_Logo_black.png" alt="Gear Studio Logo" />
+      <img src="/src/img/Gear_Studio_Logo_black.png" alt="Gear Studio Logo" />
     </a>
   </div>
 
+  <!-- Contenedor de alertas personalizadas -->
+  <div id="alert-container" class="alert-container"></div>
+
   <video autoplay muted loop id="video-fondo">
-    <source src="../src/video/Gears_login_video.mp4" type="video/mp4" />
+    <source src="/src/video/Gears_login_video.mp4" type="video/mp4" />
   </video>
   <div class="video-overlay"></div>
 
@@ -59,6 +63,45 @@
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9oanFtbGptdnVmbHVxZmZoZHllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAzNTcyMDIsImV4cCI6MjA3NTkzMzIwMn0.16Ii3f1iICoVlA6_ZGLfnVBQjj3MCFhK4os0Rpy_kX0'
     );
 
+    // Función para mostrar alertas personalizadas
+    function showAlert(message, type = 'info', duration = 4000) {
+      let container = document.getElementById('alert-container');
+      if (!container) {
+        container = document.createElement('div');
+        container.id = 'alert-container';
+        container.className = 'alert-container';
+        document.body.appendChild(container);
+      }
+
+      const alert = document.createElement('div');
+      alert.className = `alert ${type}`;
+      
+      const messageSpan = document.createElement('span');
+      messageSpan.textContent = message;
+      messageSpan.style.flex = '1';
+      
+      const closeBtn = document.createElement('button');
+      closeBtn.className = 'close-alert';
+      closeBtn.innerHTML = '×';
+      closeBtn.onclick = () => {
+        alert.style.animation = 'fadeOutAlert 0.4s ease-in forwards';
+        setTimeout(() => alert.remove(), 400);
+      };
+      
+      alert.appendChild(messageSpan);
+      alert.appendChild(closeBtn);
+      container.appendChild(alert);
+
+      setTimeout(() => {
+        if (alert.parentElement) {
+          alert.style.animation = 'fadeOutAlert 0.4s ease-in forwards';
+          setTimeout(() => {
+            if (alert.parentElement) alert.remove();
+          }, 400);
+        }
+      }, duration);
+    }
+
     const params = new URLSearchParams(window.location.search);
     const id_juego = params.get('id_juego');
 
@@ -92,7 +135,7 @@
       `;
 
       const imagen = document.getElementById('imagen-juego');
-      imagen.src = juego.imagen_url || '../src/img/default_game.jpg';
+      imagen.src = juego.imagen_url || '/src/img/default_game.jpg';
 
       const { data: metodos } = await client.from('metodopago').select('*').eq('id_usuario', user.id);
       const select = document.getElementById('metodo-pago');
@@ -128,8 +171,10 @@
         fecha_adquisicion: fecha
       }]);
 
-      alert("¡Compra realizada y juego añadido a tu biblioteca!");
-      window.location.href = "pagina_biblioteca.html";
+      showAlert("¡Compra realizada y juego añadido a tu biblioteca!", 'success', 3000);
+      setTimeout(() => {
+        window.location.href = "pagina_biblioteca.html";
+      }, 3000);
     }
 
     document.getElementById('form-metodo').addEventListener('submit', async (e) => {
@@ -141,7 +186,7 @@
 
       const { data: { user } } = await client.auth.getUser();
       if (!user) {
-        alert("Debes iniciar sesión para añadir métodos de pago.");
+        showAlert("Debes iniciar sesión para añadir métodos de pago.", 'warning', 3000);
         return;
       }
 
@@ -153,11 +198,11 @@
 
       if (error) {
         console.error("Error al guardar método:", error.message);
-        alert("Hubo un error al guardar el método de pago.");
+        showAlert("Hubo un error al guardar el método de pago.", 'error', 3000);
         return;
       }
 
-      alert("Método de pago guardado correctamente.");
+      showAlert("Método de pago guardado correctamente.", 'success', 2000);
       document.getElementById('form-metodo').reset();
       cargarDatos();
     });

@@ -5,27 +5,33 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gear Studio — Biblioteca</title>
-  <link rel="stylesheet" href="../css/estilos_biblioteca.css" />
+  <link rel="stylesheet" href="/css/estilos_biblioteca.css" />
+  <link rel="stylesheet" href="/css/estilos_base.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 </head>
 
 <body>
   <!-- Fondo de video -->
   <video autoplay muted loop id="video-fondo">
-    <source src="../src/video/Gears_login_video.mp4" type="video/mp4" />
+    <source src="/src/video/Gears_login_video.mp4" type="video/mp4" />
   </video>
   <div class="video-overlay"></div>
+
+  <!-- Contenedor de alertas personalizadas -->
+  <div id="alert-container" class="alert-container"></div>
 
   <!-- Logo y usuario -->
   <div class="logo-superior-izquierda">
     <a href="/html/index.html">
-      <img src="../src/img/Gear_Studio_Logo_black.png" alt="Logo Gear Studio" />
+      <img src="/src/img/Gear_Studio_Logo_black.png" alt="Logo Gear Studio" />
     </a>
   </div>
 
   <div class="usuario-superior-derecha" id="usuario-info" style="cursor: pointer;">
     <img id="usuario-avatar" class="avatar" src="" alt="Avatar" />
     <span id="usuario-nombre"></span>
+    <div id="notificaciones-icono" onclick="toggleNotificaciones(event)">🔔</div>
+    <div id="notificaciones-lista"></div>
   </div>
 
   <!-- Título -->
@@ -99,6 +105,44 @@
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9oanFtbGptdnVmbHVxZmZoZHllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAzNTcyMDIsImV4cCI6MjA3NTkzMzIwMn0.16Ii3f1iICoVlA6_ZGLfnVBQjj3MCFhK4os0Rpy_kX0'
     );
 
+    // Función para mostrar alertas personalizadas
+    function showAlert(message, type = 'info', duration = 4000) {
+      let container = document.getElementById('alert-container');
+      if (!container) {
+        container = document.createElement('div');
+        container.id = 'alert-container';
+        container.className = 'alert-container';
+        document.body.appendChild(container);
+      }
+      const alert = document.createElement('div');
+      alert.className = `alert ${type}`;
+
+      const messageSpan = document.createElement('span');
+      messageSpan.textContent = message;
+      messageSpan.style.flex = '1';
+
+      const closeBtn = document.createElement('button');
+      closeBtn.className = 'close-alert';
+      closeBtn.innerHTML = '×';
+      closeBtn.onclick = () => {
+        alert.style.animation = 'fadeOutAlert 0.4s ease-in forwards';
+        setTimeout(() => alert.remove(), 400);
+      };
+
+      alert.appendChild(messageSpan);
+      alert.appendChild(closeBtn);
+      container.appendChild(alert);
+
+      setTimeout(() => {
+        if (alert.parentElement) {
+          alert.style.animation = 'fadeOutAlert 0.4s ease-in forwards';
+          setTimeout(() => {
+            if (alert.parentElement) alert.remove();
+          }, 400);
+        }
+      }, duration);
+    }
+
     let juegoActualId = null;
     let juegosMap = {};
 
@@ -126,7 +170,7 @@
         const tarjeta = document.createElement('div');
         tarjeta.className = 'juego-card';
         tarjeta.innerHTML = `
-          <img src="${juego.imagen_url || '../src/img/default_game.jpg'}" alt="${juego.nombre}" />
+          <img src="${juego.imagen_url || '/src/img/default_game.jpg'}" alt="${juego.nombre}" />
           <h3>${juego.nombre}</h3>
           <p>${juego.desarrollador}</p>
           <p><strong>${juego.precio} €</strong></p>
@@ -181,7 +225,7 @@
       if (archivo) {
         const nombreArchivo = `${user.id}_${Date.now()}.${archivo.name.split('.').pop()}`;
         const { error: uploadError } = await client.storage.from('fotos_perfil').upload(nombreArchivo, archivo, { cacheControl: '3600', upsert: true });
-        if (uploadError) return alert("Error al subir la foto: " + uploadError.message);
+        if (uploadError) return showAlert("Error al subir la foto: " + uploadError.message, 'error', 3000);
         const { data } = client.storage.from('fotos_perfil').getPublicUrl(nombreArchivo);
         nuevaUrlFoto = data.publicUrl;
       }
@@ -253,7 +297,7 @@
         const tarjeta = document.createElement('div');
         tarjeta.className = 'juego-card';
         tarjeta.innerHTML = `
-        <img src="${juego.imagen_url || '../src/img/default_game.jpg'}" alt="${juego.nombre}" />
+        <img src="${juego.imagen_url || '/src/img/default_game.jpg'}" alt="${juego.nombre}" />
         <h3>${juego.nombre}</h3>
         <p>${juego.desarrollador}</p>
         <p><strong>${juego.precio} €</strong></p>
@@ -279,7 +323,7 @@
         .select('*');
 
       if (error || !juegos || juegos.length === 0) {
-        alert("No se pudo obtener juegos.");
+        showAlert("No se pudo obtener juegos.", 'error', 3000);
         return;
       }
 
@@ -323,6 +367,71 @@
       document.getElementById('modal-compra').style.display = 'none';
     }
 
+    function toggleNotificaciones(event) {
+      event.stopPropagation();
+      const lista = document.getElementById('notificaciones-lista');
+      const visible = lista.style.display === 'block';
+      lista.style.display = visible ? 'none' : 'block';
+
+      if (!visible) {
+        cargarNotificacionesUsuario();
+        marcarNotificacionesComoLeidas();
+      }
+    }
+
+    document.addEventListener('click', () => {
+      const lista = document.getElementById('notificaciones-lista');
+      if (lista) lista.style.display = 'none';
+    });
+
+    async function cargarNotificacionesUsuario() {
+      const { data: { user } } = await client.auth.getUser();
+      if (!user) return;
+
+      const { data: notificaciones, error } = await client
+        .from('notificacion')
+        .select('tipo, mensaje, fecha, leida')
+        .eq('id_usuario', user.id)
+        .order('fecha', { ascending: false });
+
+      const lista = document.getElementById('notificaciones-lista');
+      lista.innerHTML = '';
+
+      if (error || !notificaciones || notificaciones.length === 0) {
+        lista.innerHTML = '<div class="notificacion-item">No tienes notificaciones</div>';
+        return;
+      }
+
+      notificaciones.forEach(n => {
+        const item = document.createElement('div');
+        item.className = 'notificacion-item';
+        item.innerHTML = `
+          <strong>${n.tipo}</strong><br>
+          ${n.mensaje}<br>
+          <small>${new Date(n.fecha).toLocaleString()}</small>
+        `;
+        item.onclick = (e) => {
+          e.stopPropagation();
+        };
+        if (!n.leida) item.style.fontWeight = 'bold';
+        lista.appendChild(item);
+      });
+
+      const noLeidas = notificaciones.filter(n => !n.leida).length;
+      document.getElementById('notificaciones-icono').textContent = `🔔 (${noLeidas})`;
+    }
+
+    async function marcarNotificacionesComoLeidas() {
+      const { data: { user } } = await client.auth.getUser();
+      if (!user) return;
+
+      await client
+        .from('notificacion')
+        .update({ leida: true })
+        .eq('id_usuario', user.id)
+        .eq('leida', false);
+    }
+
     function confirmarCompra() {
       if (juegoActualId) {
         window.location.href = `pagina_pago.html?id_juego=${juegoActualId}`;
@@ -330,7 +439,7 @@
     }
 
     function descargarJuego(nombreJuego) {
-      alert(`🔽 Descargando "${nombreJuego}"...\n(Esto es una simulación, no hay archivo real)`);
+      showAlert(`🔽 Descargando "${nombreJuego}"...`, 'info', 3000);
     }
 
     cargarCategorias();

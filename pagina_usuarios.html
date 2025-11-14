@@ -5,11 +5,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Gear Studio — Usuarios</title>
-    <link rel="stylesheet" href="../css/estilos_usuarios.css" />
+    <link rel="stylesheet" href="/css/estilos_usuarios.css" />
+    <link rel="stylesheet" href="/css/estilos_base.css">
     <style>
         @font-face {
             font-family: 'FHACondensedFrench';
-            src: url('../src/fonts/FHACondensedFrench.ttf') format('truetype');
+            src: url('/src/fonts/FHACondensedFrench.ttf') format('truetype');
             font-weight: normal;
             font-style: normal;
         }
@@ -20,13 +21,13 @@
 <body>
     <!-- Fondo de video -->
     <video autoplay muted loop id="video-fondo">
-        <source src="../src/video/Gears_login_video.mp4" type="video/mp4" />
+        <source src="/src/video/Gears_login_video.mp4" type="video/mp4" />
     </video>
     <div class="video-overlay"></div>
 
     <div class="logo-superior-izquierda">
         <a href="/html/index.html">
-            <img src="../src/img/Gear_Studio_Logo_black.png" alt="Logo Gear Studio" />
+            <img src="/src/img/Gear_Studio_Logo_black.png" alt="Logo Gear Studio" />
         </a>
     </div>
 
@@ -38,7 +39,7 @@
     </div>
 
     <!-- Título -->
-    <h1 class="titulo-pagina">Gear Studio — Usuarios</h1>
+    <header>Gear Studio — Usuarios</header>
 
     <!-- Navbar -->
     <nav>
@@ -344,7 +345,12 @@
 
                 if (!perfil) return; // evita añadir si no hay datos
 
+                if (ul.querySelector(`li[data-id="${id}"]`)) return;
+                
                 const li = document.createElement('li');
+                
+                li.setAttribute('data-id', id);
+
                 li.innerHTML = `
                 <img src="${perfil.imagen_perfil || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(perfil.nombre_usuario)}"
                     style="width:24px;height:24px;border-radius:50%;margin-right:8px;vertical-align:middle;" />

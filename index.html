@@ -5,13 +5,14 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Gear Studio — Login</title>
-  <link rel="stylesheet" href="../css/estilos_login.css" />
+  <link rel="stylesheet" href="/css/estilos_login.css" />
+  <link rel="stylesheet" href="/css/estilos_base.css">
 
   <!-- Fuente personalizada -->
   <style>
     @font-face {
       font-family: 'FHACondensedFrench';
-      src: url('../src/fonts/FHACondensedFrench.ttf') format('truetype');
+      src: url('/src/fonts/FHACondensedFrench.ttf') format('truetype');
       font-weight: normal;
       font-style: normal;
     }
@@ -25,11 +26,52 @@
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9oanFtbGptdnVmbHVxZmZoZHllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAzNTcyMDIsImV4cCI6MjA3NTkzMzIwMn0.16Ii3f1iICoVlA6_ZGLfnVBQjj3MCFhK4os0Rpy_kX0'
     );
 
+    // Función para mostrar alertas personalizadas
+    function showAlert(message, type = 'info', duration = 4000) {
+      let container = document.getElementById('alert-container');
+      if (!container) {
+        container = document.createElement('div');
+        container.id = 'alert-container';
+        container.className = 'alert-container';
+        document.body.appendChild(container);
+      }
+
+      const alert = document.createElement('div');
+      alert.className = `alert ${type}`;
+      
+      // Crear contenedor del mensaje
+      const messageSpan = document.createElement('span');
+      messageSpan.textContent = message;
+      messageSpan.style.flex = '1';
+      
+      // Crear botón de cerrar
+      const closeBtn = document.createElement('button');
+      closeBtn.className = 'close-alert';
+      closeBtn.innerHTML = '×';
+      closeBtn.onclick = () => {
+        alert.style.animation = 'fadeOutAlert 0.4s ease-in forwards';
+        setTimeout(() => alert.remove(), 400);
+      };
+      
+      alert.appendChild(messageSpan);
+      alert.appendChild(closeBtn);
+      container.appendChild(alert);
+
+      // Auto-remover después del tiempo especificado
+      setTimeout(() => {
+        if (alert.parentElement) {
+          alert.style.animation = 'fadeOutAlert 0.4s ease-in forwards';
+          setTimeout(() => {
+            if (alert.parentElement) alert.remove();
+          }, 400);
+        }
+      }, duration);
+    }
+
     window.validarLogin = async function (event) {
       event.preventDefault();
       const email = document.getElementById('user').value.trim();
       const password = document.getElementById('pass').value.trim();
-      const error = document.getElementById('error-msg');
 
       const { data, error: authError } = await supabase.auth.signInWithPassword({
         email,
@@ -37,21 +79,12 @@
       });
 
       if (authError) {
-        error.textContent = "Usuario o contraseña incorrectos, o usuario no registrado.";
-        error.style.display = "block";
-        error.classList.remove("fade-out");
-        error.classList.add("fade-in");
-
-        setTimeout(() => {
-          error.classList.remove("fade-in");
-          error.classList.add("fade-out");
-          setTimeout(() => {
-            error.style.display = "none";
-          }, 500);
-        }, 4000);
+        showAlert("Usuario o contraseña incorrectos, o usuario no registrado.", 'error', 4000);
       } else {
-        error.style.display = "none";
-        window.location.href = "pagina_principal.html";
+        showAlert("¡Bienvenido! Redirigiendo...", 'success', 2000);
+        setTimeout(() => {
+          window.location.href = "pagina_principal.html";
+        }, 2000);
       }
     };
 
@@ -72,7 +105,6 @@
       const nombre = document.getElementById('new-name').value.trim();
       const email = document.getElementById('new-user').value.trim();
       const password = document.getElementById('new-pass').value.trim();
-      const error = document.getElementById('error-msg');
 
       const { data, error: signUpError } = await supabase.auth.signUp({
         email,
@@ -80,18 +112,7 @@
       });
 
       if (signUpError) {
-        error.textContent = "Error al registrar: " + signUpError.message;
-        error.style.display = "block";
-        error.classList.remove("fade-out");
-        error.classList.add("fade-in");
-
-        setTimeout(() => {
-          error.classList.remove("fade-in");
-          error.classList.add("fade-out");
-          setTimeout(() => {
-            error.style.display = "none";
-          }, 500);
-        }, 4000);
+        showAlert("Error al registrar: " + signUpError.message, 'error', 4000);
         return;
       }
 
@@ -112,39 +133,32 @@
         ]);
 
       if (insertError) {
-        error.textContent = "Usuario creado pero no guardado en la tabla: " + insertError.message;
+        showAlert("Usuario creado pero no guardado en la tabla: " + insertError.message, 'warning', 4000);
       } else {
-        error.textContent = "Usuario registrado correctamente.";
-      }
-
-      error.style.display = "block";
-      error.classList.remove("fade-out");
-      error.classList.add("fade-in");
-
-      setTimeout(() => {
-        error.classList.remove("fade-in");
-        error.classList.add("fade-out");
+        showAlert("Usuario registrado correctamente. Redirigiendo...", 'success', 2000);
         setTimeout(() => {
-          error.style.display = "none";
           window.location.href = "pagina_principal.html";
-        }, 500);
-      }, 3000);
+        }, 2000);
+      }
     };
   </script>
 </head>
 
 <body>
   <video autoplay muted loop id="video-fondo">
-    <source src="../src/video/Gears_login_video.mp4" type="video/mp4" />
+    <source src="/src/video/Gears_login_video.mp4" type="video/mp4" />
   </video>
   <div class="video-overlay"></div>
+
+  <!-- Contenedor de alertas personalizadas -->
+  <div id="alert-container" class="alert-container"></div>
 
   <div class="page">
     <main class="hero">
       <aside class="panel-wrap steampunk-font">
         <section class="panel">
           <div class="welcome">Bienvenida</div>
-          <img src="../src/img/invitado.jpg" alt="Foto invitado steampunk" class="avatar-img" />
+          <img src="/src/img/invitado.jpg" alt="Foto invitado steampunk" class="avatar-img" />
 
           <!-- Login -->
           <form class="login-form" onsubmit="return validarLogin(event)">
@@ -170,14 +184,14 @@
 
       <section class="logo-area">
         <div class="logo-wrapper">
-          <img src="../src/img/login_circle.png" alt="Decoración steampunk" class="logo-circle" />
+          <img src="/src/img/login_circle.png" alt="Decoración steampunk" class="logo-circle" />
           <div class="logo-bg"></div>
-          <img src="../src/img/Gear_Studio_Logo_black.png" alt="Logo Gear Studio" class="logo-img" />
+          <img src="/src/img/Gear_Studio_Logo_black.png" alt="Logo Gear Studio" class="logo-img" />
         </div>
       </section>
     </main>
 
-    <div id="error-msg" class="error-popup" style="display:none;"></div>
+    <!-- Alertas personalizadas (contenedor) -->
   </div>
 </body>
 
