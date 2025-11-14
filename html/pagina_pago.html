@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Gear Studio — Pago</title>
+  <link rel="stylesheet" href="../css/estilos_pago.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+</head>
+
+<body>
+  <div class="logo-superior-izquierda">
+    <a href="index.html">
+      <img src="../src/img/Gear_Studio_Logo_black.png" alt="Gear Studio Logo" />
+    </a>
+  </div>
+
+  <video autoplay muted loop id="video-fondo">
+    <source src="../src/video/Gears_login_video.mp4" type="video/mp4" />
+  </video>
+  <div class="video-overlay"></div>
+
+  <main class="pago-layout">
+    <div class="pago-info">
+      <h2>Confirmar compra</h2>
+      <div id="info-juego"></div>
+
+      <h3>Selecciona método de pago</h3>
+      <select id="metodo-pago"></select>
+
+      <h3>Añadir nuevo método de pago</h3>
+      <form id="form-metodo">
+        <label for="tipo">Tipo:</label>
+        <input type="text" id="tipo" placeholder="Ej. Tarjeta, PayPal" required />
+
+        <label for="detalles">Detalles:</label>
+        <input type="text" id="detalles" placeholder="Ej. Visa ****1234" required />
+
+        <button type="submit">Guardar método</button>
+      </form>
+    </div>
+
+    <div class="pago-lateral">
+      <div class="pago-imagen">
+        <img id="imagen-juego" src="" alt="Imagen del juego" />
+      </div>
+      <div class="boton-wrapper">
+        <button class="boton-finalizar" onclick="finalizarCompra()">Finalizar compra</button>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    Gear Studio © 2025 — Todos los derechos reservados
+  </footer>
+
+  <script>
+    const client = supabase.createClient(
+      'https://ohjqmljmvufluqffhdye.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9oanFtbGptdnVmbHVxZmZoZHllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAzNTcyMDIsImV4cCI6MjA3NTkzMzIwMn0.16Ii3f1iICoVlA6_ZGLfnVBQjj3MCFhK4os0Rpy_kX0'
+    );
+
+    const params = new URLSearchParams(window.location.search);
+    const id_juego = params.get('id_juego');
+
+    async function cargarDatos() {
+      const { data: { user } } = await client.auth.getUser();
+      if (!user) return;
+
+      const { data: juego } = await client.from('juego').select('*').eq('id_juego', id_juego).single();
+
+      let categoriaNombre = 'Sin categoría';
+      const { data: relaciones } = await client
+        .from('juego_categoria')
+        .select('id_categoria')
+        .eq('id_juego', id_juego);
+
+      if (relaciones && relaciones.length > 0) {
+        const idCat = relaciones[0].id_categoria;
+        const { data: categoria } = await client
+          .from('categoria')
+          .select('nombre_categoria')
+          .eq('id_categoria', idCat)
+          .single();
+        if (categoria) categoriaNombre = categoria.nombre_categoria;
+      }
+
+      document.getElementById('info-juego').innerHTML = `
+        <strong>${juego.nombre}</strong><br>
+        Precio: ${juego.precio} €<br>
+        Desarrollador: ${juego.desarrollador}<br>
+        Categoría: ${categoriaNombre}
+      `;
+
+      const imagen = document.getElementById('imagen-juego');
+      imagen.src = juego.imagen_url || '../src/img/default_game.jpg';
+
+      const { data: metodos } = await client.from('metodopago').select('*').eq('id_usuario', user.id);
+      const select = document.getElementById('metodo-pago');
+      if (metodos && metodos.length > 0) {
+        metodos.forEach(m => {
+          const option = document.createElement('option');
+          option.value = m.id_metodo;
+          option.textContent = `${m.tipo} — ${m.detalles}`;
+          select.appendChild(option);
+        });
+      } else {
+        select.innerHTML = '<option disabled>No tienes métodos de pago registrados</option>';
+      }
+    }
+
+    async function finalizarCompra() {
+      const { data: { user } } = await client.auth.getUser();
+      const id_metodo = document.getElementById('metodo-pago').value;
+      const { data: juego } = await client.from('juego').select('*').eq('id_juego', id_juego).single();
+
+      const fecha = new Date().toISOString();
+
+      await client.from('compra').insert([{
+        id_usuario: user.id,
+        id_juego: id_juego,
+        fecha_compra: fecha,
+        precio_pagado: juego.precio
+      }]);
+
+      await client.from('biblioteca').insert([{
+        id_usuario: user.id,
+        id_juego: id_juego,
+        fecha_adquisicion: fecha
+      }]);
+
+      alert("¡Compra realizada y juego añadido a tu biblioteca!");
+      window.location.href = "pagina_biblioteca.html";
+    }
+
+    document.getElementById('form-metodo').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const tipo = document.getElementById('tipo').value.trim();
+      const detalles = document.getElementById('detalles').value.trim();
+      if (!tipo || !detalles) return;
+
+      const { data: { user } } = await client.auth.getUser();
+      if (!user) {
+        alert("Debes iniciar sesión para añadir métodos de pago.");
+        return;
+      }
+
+      const { error } = await client.from('metodopago').insert([{
+        id_usuario: user.id,
+        tipo: tipo,
+        detalles: detalles
+      }]);
+
+      if (error) {
+        console.error("Error al guardar método:", error.message);
+        alert("Hubo un error al guardar el método de pago.");
+        return;
+      }
+
+      alert("Método de pago guardado correctamente.");
+      document.getElementById('form-metodo').reset();
+      cargarDatos();
+    });
+
+    cargarDatos();
+  </script>
+</body>
+</html>

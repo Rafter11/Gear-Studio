@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Gear Studio — Login</title>
+  <link rel="stylesheet" href="../css/estilos_login.css" />
+
+  <!-- Fuente personalizada -->
+  <style>
+    @font-face {
+      font-family: 'FHACondensedFrench';
+      src: url('../src/fonts/FHACondensedFrench.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+    }
+  </style>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+    const supabase = createClient(
+      'https://ohjqmljmvufluqffhdye.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9oanFtbGptdnVmbHVxZmZoZHllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAzNTcyMDIsImV4cCI6MjA3NTkzMzIwMn0.16Ii3f1iICoVlA6_ZGLfnVBQjj3MCFhK4os0Rpy_kX0'
+    );
+
+    window.validarLogin = async function (event) {
+      event.preventDefault();
+      const email = document.getElementById('user').value.trim();
+      const password = document.getElementById('pass').value.trim();
+      const error = document.getElementById('error-msg');
+
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (authError) {
+        error.textContent = "Usuario o contraseña incorrectos, o usuario no registrado.";
+        error.style.display = "block";
+        error.classList.remove("fade-out");
+        error.classList.add("fade-in");
+
+        setTimeout(() => {
+          error.classList.remove("fade-in");
+          error.classList.add("fade-out");
+          setTimeout(() => {
+            error.style.display = "none";
+          }, 500);
+        }, 4000);
+      } else {
+        error.style.display = "none";
+        window.location.href = "pagina_principal.html";
+      }
+    };
+
+    window.mostrarRegistro = function () {
+      document.querySelector(".login-form").style.display = "none";
+      document.querySelector(".registro-form").style.display = "flex";
+      document.querySelector(".panel button[type='button']").style.display = "none";
+    };
+
+    window.mostrarLogin = function () {
+      document.querySelector(".registro-form").style.display = "none";
+      document.querySelector(".login-form").style.display = "flex";
+      document.querySelector(".panel button[type='button']").style.display = "block";
+    };
+
+    window.registrarUsuario = async function (event) {
+      event.preventDefault();
+      const nombre = document.getElementById('new-name').value.trim();
+      const email = document.getElementById('new-user').value.trim();
+      const password = document.getElementById('new-pass').value.trim();
+      const error = document.getElementById('error-msg');
+
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password
+      });
+
+      if (signUpError) {
+        error.textContent = "Error al registrar: " + signUpError.message;
+        error.style.display = "block";
+        error.classList.remove("fade-out");
+        error.classList.add("fade-in");
+
+        setTimeout(() => {
+          error.classList.remove("fade-in");
+          error.classList.add("fade-out");
+          setTimeout(() => {
+            error.style.display = "none";
+          }, 500);
+        }, 4000);
+        return;
+      }
+
+      const { user } = data;
+
+      const { error: insertError } = await supabase
+        .from('usuario')
+        .insert([
+          {
+            id_usuario: user.id,
+            nombre_usuario: nombre,
+            email: email,
+            contrasena: password,
+            rol: "invitado",
+            fecha_registro: new Date().toISOString(),
+            imagen_perfil: "https://ohjqmljmvufluqffhdye.supabase.co/storage/v1/object/public/fotos_perfil/invitado.jpg"
+          }
+        ]);
+
+      if (insertError) {
+        error.textContent = "Usuario creado pero no guardado en la tabla: " + insertError.message;
+      } else {
+        error.textContent = "Usuario registrado correctamente.";
+      }
+
+      error.style.display = "block";
+      error.classList.remove("fade-out");
+      error.classList.add("fade-in");
+
+      setTimeout(() => {
+        error.classList.remove("fade-in");
+        error.classList.add("fade-out");
+        setTimeout(() => {
+          error.style.display = "none";
+          window.location.href = "pagina_principal.html";
+        }, 500);
+      }, 3000);
+    };
+  </script>
+</head>
+
+<body>
+  <video autoplay muted loop id="video-fondo">
+    <source src="../src/video/Gears_login_video.mp4" type="video/mp4" />
+  </video>
+  <div class="video-overlay"></div>
+
+  <div class="page">
+    <main class="hero">
+      <aside class="panel-wrap steampunk-font">
+        <section class="panel">
+          <div class="welcome">Bienvenida</div>
+          <img src="../src/img/invitado.jpg" alt="Foto invitado steampunk" class="avatar-img" />
+
+          <!-- Login -->
+          <form class="login-form" onsubmit="return validarLogin(event)">
+            <input id="user" name="user" class="input" type="email" placeholder="correo electrónico" required>
+            <input id="pass" name="pass" class="input" type="password" placeholder="contraseña" required>
+            <button type="submit" class="submit">Entrar</button>
+            <button type="button" class="submit" onclick="mostrarRegistro()">¿No tienes cuenta? Regístrate</button>
+          </form>
+
+          <!-- Registro -->
+          <form class="registro-form" onsubmit="return registrarUsuario(event)" style="display:none;">
+            <input id="new-name" name="new-name" class="input" type="text" placeholder="nuevo nombre de usuario"
+              required>
+            <input id="new-user" name="new-user" class="input" type="email" placeholder="nuevo correo electrónico"
+              required>
+            <input id="new-pass" name="new-pass" class="input" type="password" placeholder="nueva contraseña" required>
+            <button type="submit" class="submit">Registrarse</button>
+            <button type="button" class="submit" onclick="mostrarLogin()">¿Ya tienes cuenta? Inicia sesión</button>
+          </form>
+
+        </section>
+      </aside>
+
+      <section class="logo-area">
+        <div class="logo-wrapper">
+          <img src="../src/img/login_circle.png" alt="Decoración steampunk" class="logo-circle" />
+          <div class="logo-bg"></div>
+          <img src="../src/img/Gear_Studio_Logo_black.png" alt="Logo Gear Studio" class="logo-img" />
+        </div>
+      </section>
+    </main>
+
+    <div id="error-msg" class="error-popup" style="display:none;"></div>
+  </div>
+</body>
+
+</html>

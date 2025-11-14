@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gear Studio — Biblioteca</title>
+  <link rel="stylesheet" href="../css/estilos_biblioteca.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+</head>
+
+<body>
+  <!-- Fondo de video -->
+  <video autoplay muted loop id="video-fondo">
+    <source src="../src/video/Gears_login_video.mp4" type="video/mp4" />
+  </video>
+  <div class="video-overlay"></div>
+
+  <!-- Logo y usuario -->
+  <div class="logo-superior-izquierda">
+    <a href="/html/index.html">
+      <img src="../src/img/Gear_Studio_Logo_black.png" alt="Logo Gear Studio" />
+    </a>
+  </div>
+
+  <div class="usuario-superior-derecha" id="usuario-info" style="cursor: pointer;">
+    <img id="usuario-avatar" class="avatar" src="" alt="Avatar" />
+    <span id="usuario-nombre"></span>
+  </div>
+
+  <!-- Título -->
+  <h1 class="titulo-pagina">Gear Studio — Biblioteca</h1>
+
+  <!-- Navbar -->
+  <nav>
+    <button onclick="location.href='pagina_principal.html'">Inicio</button>
+    <button onclick="location.href='pagina_chats.html'">Chats</button>
+    <button onclick="location.href='pagina_usuarios.html'">Amigos</button>
+    <button onclick="juegoAleatorio()">Juego aleatorio</button>
+    <input type="text" id="busqueda-nombre" placeholder="Buscar por nombre">
+  </nav>
+
+  <aside class="filtros-biblioteca">
+    <select id="filtro-categoria">
+      <option value="">Todas las categorías</option>
+    </select>
+    <input type="number" id="filtro-precio" placeholder="Precio máximo (€)" />
+    <input type="text" id="filtro-desarrollador" placeholder="Buscar por desarrollador" />
+    <button onclick="filtrarBiblioteca()">Aplicar filtros</button>
+  </aside>
+
+  <!-- Contenido principal -->
+  <main>
+    <h2 id="titulo-biblioteca">Biblioteca</h2>
+    <div id="contenedor-juegos" class="juegos-grid"></div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    Gear Studio © 2025 — Todos los derechos reservados
+  </footer>
+
+  <!-- Modal de perfil (versión completa) -->
+  <div id="modal-perfil" class="modal">
+    <div class="modal-contenido">
+      <span class="cerrar" onclick="cerrarModal()">&times;</span>
+      <h2>Editar Perfil</h2>
+      <form id="form-editar">
+        <label>Nombre</label>
+        <input type="text" id="nombre" class="modal-input" />
+        <label>Correo</label>
+        <input type="email" id="correo" class="modal-input" />
+        <label>Foto nueva</label>
+        <input type="file" id="foto" class="modal-input" accept="image/*" />
+        <label>Contraseña</label>
+        <input type="password" id="contrasena" class="modal-input" />
+        <button type="submit">Guardar cambios</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal de compra -->
+  <div id="modal-compra" class="modal">
+    <div class="modal-contenido">
+      <span class="cerrar" onclick="cerrarModalCompra()">&times;</span>
+      <h2 id="modal-nombre"></h2>
+      <img id="modal-imagen" style="max-width: 100%; margin-bottom: 10px;" />
+      <p><strong>Descripción:</strong> <span id="modal-descripcion"></span></p>
+      <p><strong>Precio:</strong> <span id="modal-precio"></span> €</p>
+      <p><strong>Desarrollador:</strong> <span id="modal-desarrollador"></span></p>
+      <p><strong>Categoría:</strong> <span id="modal-categoria"></span></p>
+      <button onclick="confirmarCompra()">Confirmar compra</button>
+    </div>
+  </div>
+
+  <script>
+    const client = supabase.createClient(
+      'https://ohjqmljmvufluqffhdye.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9oanFtbGptdnVmbHVxZmZoZHllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAzNTcyMDIsImV4cCI6MjA3NTkzMzIwMn0.16Ii3f1iICoVlA6_ZGLfnVBQjj3MCFhK4os0Rpy_kX0'
+    );
+
+    let juegoActualId = null;
+    let juegosMap = {};
+
+    async function cargarBiblioteca() {
+      const { data: { user } } = await client.auth.getUser();
+      if (!user) return;
+
+      const { data: biblioteca } = await client
+        .from('biblioteca')
+        .select('id_juego')
+        .eq('id_usuario', user.id);
+
+      const contenedor = document.getElementById('contenedor-juegos');
+      contenedor.innerHTML = '';
+
+      for (const entrada of biblioteca) {
+        const { data: juego } = await client
+          .from('juego')
+          .select('*')
+          .eq('id_juego', entrada.id_juego)
+          .single();
+
+        juegosMap[juego.id_juego] = juego;
+
+        const tarjeta = document.createElement('div');
+        tarjeta.className = 'juego-card';
+        tarjeta.innerHTML = `
+          <img src="${juego.imagen_url || '../src/img/default_game.jpg'}" alt="${juego.nombre}" />
+          <h3>${juego.nombre}</h3>
+          <p>${juego.desarrollador}</p>
+          <p><strong>${juego.precio} €</strong></p>
+          <button onclick="descargarJuego('${juego.nombre}')" class="boton-descargar">Descargar</button>
+        `;
+        contenedor.appendChild(tarjeta);
+      }
+    }
+
+    async function mostrarUsuario() {
+      const { data: { user }, error } = await client.auth.getUser();
+      if (error || !user) return;
+
+      const correo = user.email;
+      const { data: perfil, error: errorPerfil } = await client
+        .from('usuario')
+        .select('nombre_usuario, imagen_perfil, contrasena')
+        .eq('email', correo)
+        .single();
+
+      if (errorPerfil || !perfil) return;
+
+      document.getElementById('usuario-nombre').textContent = perfil.nombre_usuario || correo;
+      document.getElementById('usuario-avatar').src =
+        perfil.imagen_perfil || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(perfil.nombre_usuario || correo);
+
+      document.getElementById('nombre').value = perfil.nombre_usuario || "";
+      document.getElementById('correo').value = correo;
+      document.getElementById('contrasena').value = perfil.contrasena || "";
+      document.getElementById('titulo-biblioteca').textContent = `Biblioteca de ${perfil.nombre_usuario}`;
+    }
+
+    document.getElementById("usuario-info").onclick = () => {
+      document.getElementById("modal-perfil").style.display = "flex";
+    };
+
+    function cerrarModal() {
+      document.getElementById("modal-perfil").style.display = "none";
+    }
+
+    document.getElementById("form-editar").addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const nombre = document.getElementById("nombre").value.trim();
+      const correo = document.getElementById("correo").value.trim();
+      const contrasena = document.getElementById("contrasena").value.trim();
+      const archivo = document.getElementById("foto").files[0];
+
+      const { data: { user }, error: userError } = await client.auth.getUser();
+      if (userError || !user) return;
+
+      let nuevaUrlFoto = null;
+      if (archivo) {
+        const nombreArchivo = `${user.id}_${Date.now()}.${archivo.name.split('.').pop()}`;
+        const { error: uploadError } = await client.storage.from('fotos_perfil').upload(nombreArchivo, archivo, { cacheControl: '3600', upsert: true });
+        if (uploadError) return alert("Error al subir la foto: " + uploadError.message);
+        const { data } = client.storage.from('fotos_perfil').getPublicUrl(nombreArchivo);
+        nuevaUrlFoto = data.publicUrl;
+      }
+
+      await client.from('usuario').update({
+        ...(nombre && { nombre_usuario: nombre }),
+        ...(correo && { email: correo }),
+        ...(nuevaUrlFoto && { imagen_perfil: nuevaUrlFoto }),
+        ...(contrasena && { contrasena: contrasena })
+      }).eq('id_usuario', user.id);
+
+      if (correo || contrasena) {
+        await client.auth.updateUser({
+          ...(correo && { email: correo }),
+          ...(contrasena && { password: contrasena })
+        });
+      }
+
+      if (nuevaUrlFoto) document.getElementById('usuario-avatar').src = nuevaUrlFoto;
+      if (nombre) document.getElementById('usuario-nombre').textContent = nombre;
+      cerrarModal();
+    });
+
+    async function filtrarBiblioteca() {
+      const nombre = document.getElementById('busqueda-nombre').value.trim();
+      const categoria = document.getElementById('filtro-categoria').value;
+      const precioMax = document.getElementById('filtro-precio').value;
+      const desarrollador = document.getElementById('filtro-desarrollador').value.trim();
+
+      const { data: { user } } = await client.auth.getUser();
+      if (!user) return;
+
+      const { data: biblioteca } = await client
+        .from('biblioteca')
+        .select('id_juego')
+        .eq('id_usuario', user.id);
+
+      const ids = biblioteca.map(b => b.id_juego);
+
+      let query = client.from('juego').select('*').in('id_juego', ids);
+      if (nombre) query = query.ilike('nombre', `%${nombre}%`);
+      if (precioMax) query = query.lte('precio', parseFloat(precioMax));
+      if (desarrollador) query = query.ilike('desarrollador', `%${desarrollador}%`);
+
+      const { data: juegos } = await query;
+
+      let filtrados = juegos;
+
+      if (categoria) {
+        const { data: categorias } = await client.from('categoria').select('id_categoria, nombre_categoria');
+        const categoriaObj = categorias.find(c => c.nombre_categoria === categoria);
+        if (categoriaObj) {
+          const { data: relaciones } = await client
+            .from('juego_categoria')
+            .select('id_juego')
+            .eq('id_categoria', categoriaObj.id_categoria);
+          const idsFiltrados = relaciones.map(r => r.id_juego);
+          filtrados = juegos.filter(j => idsFiltrados.includes(j.id_juego));
+        } else {
+          filtrados = [];
+        }
+      }
+
+      const contenedor = document.getElementById('contenedor-juegos');
+      contenedor.innerHTML = '';
+
+      filtrados.forEach(juego => {
+        juegosMap[juego.id_juego] = juego;
+        const tarjeta = document.createElement('div');
+        tarjeta.className = 'juego-card';
+        tarjeta.innerHTML = `
+        <img src="${juego.imagen_url || '../src/img/default_game.jpg'}" alt="${juego.nombre}" />
+        <h3>${juego.nombre}</h3>
+        <p>${juego.desarrollador}</p>
+        <p><strong>${juego.precio} €</strong></p>
+      `;
+        contenedor.appendChild(tarjeta);
+      });
+    }
+
+    async function cargarCategorias() {
+      const { data } = await client.from('categoria').select('nombre_categoria');
+      const select = document.getElementById('filtro-categoria');
+      data.forEach(cat => {
+        const option = document.createElement('option');
+        option.value = cat.nombre_categoria;
+        option.textContent = cat.nombre_categoria;
+        select.appendChild(option);
+      });
+    }
+
+    async function juegoAleatorio() {
+      const { data: juegos, error } = await client
+        .from('juego')
+        .select('*');
+
+      if (error || !juegos || juegos.length === 0) {
+        alert("No se pudo obtener juegos.");
+        return;
+      }
+
+      const aleatorio = juegos[Math.floor(Math.random() * juegos.length)];
+      juegosMap[aleatorio.id_juego] = aleatorio;
+      abrirModalCompra(aleatorio.id_juego);
+    }
+
+    async function abrirModalCompra(id_juego) {
+      const juego = juegosMap[id_juego];
+      if (!juego) return;
+
+      juegoActualId = juego.id_juego;
+      document.getElementById('modal-nombre').textContent = juego.nombre;
+      document.getElementById('modal-imagen').src = juego.imagen_url;
+      document.getElementById('modal-descripcion').textContent = juego.descripcion;
+      document.getElementById('modal-precio').textContent = juego.precio;
+      document.getElementById('modal-desarrollador').textContent = juego.desarrollador;
+
+      const { data: relaciones } = await client
+        .from('juego_categoria')
+        .select('id_categoria')
+        .eq('id_juego', juego.id_juego);
+
+      let categoriaNombre = 'Sin categoría';
+      if (relaciones && relaciones.length > 0) {
+        const idCat = relaciones[0].id_categoria;
+        const { data: categoria } = await client
+          .from('categoria')
+          .select('nombre_categoria')
+          .eq('id_categoria', idCat)
+          .single();
+        if (categoria) categoriaNombre = categoria.nombre_categoria;
+      }
+
+      document.getElementById('modal-categoria').textContent = categoriaNombre;
+      document.getElementById('modal-compra').style.display = 'flex';
+    }
+
+    function cerrarModalCompra() {
+      document.getElementById('modal-compra').style.display = 'none';
+    }
+
+    function confirmarCompra() {
+      if (juegoActualId) {
+        window.location.href = `pagina_pago.html?id_juego=${juegoActualId}`;
+      }
+    }
+
+    function descargarJuego(nombreJuego) {
+      alert(`🔽 Descargando "${nombreJuego}"...\n(Esto es una simulación, no hay archivo real)`);
+    }
+
+    cargarCategorias();
+    mostrarUsuario();
+    cargarBiblioteca();
+  </script>
+
+</body>
+
+</html>

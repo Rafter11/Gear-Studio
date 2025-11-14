@@ -1,0 +1,423 @@
+@font-face {
+  font-family: 'FHACondensedFrench';
+  src: url('../src/fonts/FHACondensedFrench.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+:root {
+  --bg: #DBCA9A;
+  --panel: #80acaa;
+  --inner: #34544F;
+  --accent: #fdd978;
+  --blue: #C08B51;
+  --input-bg: #e7e7e7;
+  --text: #000;
+  --muted: #333;
+  font-family: 'FHACondensedFrench', "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* RESET / LAYOUT BASE */
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: var(--font-family);
+  color: var(--text);
+  background: transparent; /* la página usa video de fondo */
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  position: relative;
+  z-index: 1;
+}
+
+/* VIDEO DE FONDO (ya presente en HTML) */
+#video-fondo {
+  position: fixed;
+  top: 0;
+  left: 0;
+  min-width: 100%;
+  min-height: 100%;
+  object-fit: cover;
+  z-index: -2;
+  filter: blur(12px);
+  pointer-events: none;
+}
+
+.video-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.2);
+  z-index: -1;
+}
+
+/* LOGO Y USUARIO (idénticos a la principal) */
+.logo-superior-izquierda {
+  position: absolute;
+  top: 13px;
+  left: 20px;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.85);
+  padding: 1px 1px;
+  border-radius: 40px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.logo-superior-izquierda a,
+.logo-superior-izquierda img {
+  display: block;
+}
+
+.logo-superior-izquierda img {
+  height: 100px;
+  width: auto;
+  display: block;
+  cursor: pointer;
+}
+
+.usuario-superior-derecha {
+  position: absolute;
+  top: 32px;
+  right: 20px;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.85);
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 25px;
+  color: #333;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 260px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: var(--font-family);
+}
+
+.usuario-superior-derecha .avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid #999;
+}
+
+/* TITULO: adaptamos tu h1.titulo-pagina para que parezca el header de la principal */
+.titulo-pagina {
+  background: linear-gradient(to right, #A7623C, #C08B51);
+  color: white;
+  text-align: center;
+  font-weight: 700;
+  padding: 10px 0;
+  letter-spacing: 1px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 2;
+  font-size: 30px;
+  margin: 0; /* elimina margenes por defecto del h1 */
+}
+
+/* NAVBAR: idéntico a la principal */
+nav {
+  background: var(--inner);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px;
+  flex-wrap: wrap;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  z-index: 2;
+}
+
+nav button {
+  font-family: var(--font-family);
+  font-size: 20px;
+  background: var(--input-bg);
+  border: 2px solid #786F5D;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #111;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s ease;
+}
+
+nav button:hover {
+  background-color: var(--accent);
+  color: #000;
+}
+
+nav input {
+  font-family: var(--font-family);
+  font-size: 20px;
+  min-width: 200px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 2px solid #786F5D;
+  background-color: var(--input-bg);
+  color: #111;
+}
+
+/* CONTENIDO PRINCIPAL: mantenemos tu estructura pero aplicamos un contenedor ancho como en principal */
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 20px;
+  box-sizing: border-box;
+  gap: 20px;
+  z-index: 2;
+  width: 100%;
+}
+
+main h2 {
+  color: var(--accent);
+  text-align: center;
+  margin-top: 0;
+}
+
+/* Grid de juegos - mantengo tus clases pero con estética similar a principal */
+.juegos-grid {
+  width: 100%;
+  max-width: 1200px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+  margin-top: 10px;
+  padding: 0;
+  list-style: none;
+}
+
+/* tarjeta similar a .juego de la principal */
+.juego-card {
+  background: var(--panel);
+  padding: 16px;
+  border-radius: 6px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  text-align: center;
+  color: #222;
+}
+
+.juego-card img {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+/* PIE DE PÁGINA: idéntico a la principal */
+footer {
+  background: linear-gradient(to right, #A7623C, #C08B51);
+  color: white;
+  text-align: center;
+  padding: 8px;
+  font-size: 15px;
+  margin-top: auto;
+  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 2;
+}
+
+/* MODAL: hacemos que tu modal sea igual al de la principal (clases coincidentes) */
+.modal {
+  display: none; /* se activa desde JS */
+  position: fixed;
+  z-index: 100;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  justify-content: center;
+  align-items: center;
+}
+
+/* contenido del modal con el estilo de la principal */
+.modal-contenido {
+  background-color: var(--inner); /* fondo oscuro como en principal */
+  margin: 1% auto;
+  padding: 20px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+  font-family: var(--font-family);
+  color: #f0f0f0; /* texto claro para contraste con fondo oscuro */
+  position: relative;
+}
+
+.modal-contenido button {
+  margin-top: 20px;
+  width: 100%;
+  padding: 12px;
+  font-size: 20px;
+  background-color: var(--blue);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: var(--font-family);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  transition: background-color 0.3s ease;
+}
+
+.modal-contenido button:hover {
+  background-color: #A7623C;
+}
+
+.modal-contenido h3,
+.modal-contenido h2 {
+  color: var(--accent);
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+/* inputs y labels dentro del modal compatibles con tu HTML */
+.modal-contenido label {
+  display: block;
+  margin-top: 15px;
+  font-size: 20px;
+  font-weight: bold;
+  color: var(--accent);
+}
+
+.modal-contenido input,
+.modal-contenido textarea,
+.modal-contenido select {
+  width: 100%;
+  padding: 10px;
+  font-size: 18px;
+  margin-top: 5px;
+  border-radius: 6px;
+  border: 2px solid #786F5D;
+  background: var(--input-bg);
+  font-family: var(--font-family);
+  color: #111;
+  box-sizing: border-box;
+}
+
+/* boton guardar en modal */
+.modal-contenido button[type="submit"] {
+  margin-top: 20px;
+  width: 100%;
+  padding: 12px;
+  font-size: 20px;
+  background-color: var(--blue);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: var(--font-family);
+}
+
+.modal-contenido button[type="submit"]:hover {
+  background-color: #A7623C;
+}
+
+/* boton cerrar (X) */
+.cerrar {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  font-size: 30px;
+  font-weight: bold;
+  cursor: pointer;
+  color: var(--accent);
+}
+
+/* FILTROS DE BIBLIOTECA */
+.filtros-biblioteca {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+  margin: 20px auto;
+  padding: 10px 20px;
+  background-color: var(--inner);
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  max-width: 1000px;
+  z-index: 2;
+}
+
+.filtros-biblioteca select,
+.filtros-biblioteca input {
+  font-family: var(--font-family);
+  font-size: 18px;
+  padding: 10px;
+  border-radius: 6px;
+  border: 2px solid #786F5D;
+  background-color: var(--input-bg);
+  color: #111;
+  min-width: 180px;
+}
+
+.filtros-biblioteca button {
+  font-family: var(--font-family);
+  font-size: 18px;
+  padding: 10px 20px;
+  border-radius: 6px;
+  border: none;
+  background-color: var(--blue);
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  transition: background-color 0.3s ease;
+}
+
+.filtros-biblioteca button:hover {
+  background-color: #A7623C;
+}
+
+/* Responsive ajustes */
+@media (max-width: 600px) {
+  .filtros-biblioteca {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .filtros-biblioteca select,
+  .filtros-biblioteca input {
+    min-width: 100%;
+  }
+}
+
+.boton-descargar {
+  margin-top: 10px;
+  padding: 10px 16px;
+  font-size: 16px;
+  background-color: var(--blue);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: var(--font-family);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  transition: background-color 0.3s ease;
+}
+
+.boton-descargar:hover {
+  background-color: #A7623C;
+}
+
+/* pequeños ajustes responsivos */
+@media (max-width: 600px) {
+  nav button { font-size: 16px; padding: 8px 12px; }
+  nav input { min-width: 120px; font-size: 16px; padding: 8px; }
+  .logo-superior-izquierda img { height: 70px; }
+  .usuario-superior-derecha { font-size: 18px; padding: 6px 10px; top: 20px; }
+}

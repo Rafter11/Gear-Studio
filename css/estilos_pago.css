@@ -1,0 +1,204 @@
+@font-face {
+  font-family: 'FHACondensedFrench';
+  src: url('../src/fonts/FHACondensedFrench.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+:root {
+  --bg: #DBCA9A;
+  --panel: #80acaa;
+  --inner: #34544F;
+  --accent: #fdd978;
+  --blue: #C08B51;
+  --input-bg: #e7e7e7;
+  --text: #000;
+  --muted: #333;
+  font-family: 'FHACondensedFrench', "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  height: 100%;
+}
+
+body {
+  background-color: var(--bg);
+  font-family: var(--font-family);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Fondo de video */
+#video-fondo {
+  position: fixed;
+  top: 0;
+  left: 0;
+  min-width: 100%;
+  min-height: 100%;
+  object-fit: cover;
+  z-index: -2;
+  filter: blur(12px);
+  pointer-events: none;
+}
+
+.video-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.2);
+  z-index: -1;
+}
+
+/* Layout principal */
+main.pago-layout {
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  gap: 60px;
+  width: 90%;
+  max-width: 1200px;
+  margin: 80px auto 20px auto;
+  flex-grow: 1;
+}
+
+/* Panel izquierdo */
+.pago-info {
+  background-color: var(--panel);
+  flex: 1;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  max-width: 600px;
+}
+
+h2, h3 {
+  text-align: left;
+  color: var(--accent);
+  margin-bottom: 20px;
+}
+
+#info-juego {
+  background-color: var(--input-bg);
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+select, input {
+  width: 100%;
+  padding: 12px;
+  font-size: 18px;
+  border-radius: 6px;
+  border: 2px solid #786F5D;
+  background-color: var(--input-bg);
+  margin-bottom: 20px;
+  font-family: var(--font-family);
+  color: #111;
+}
+
+button {
+  width: 100%;
+  padding: 14px;
+  font-size: 20px;
+  background-color: var(--blue);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: var(--font-family);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #A7623C;
+}
+
+.pago-lateral {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 40px;
+  height: 100%;
+}
+
+.pago-imagen {
+  max-width: 600px;
+}
+
+.pago-imagen img {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.boton-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 5%;
+}
+
+.boton-finalizar {
+  width: 100%;
+  max-width: 300px;
+  padding: 14px;
+  font-size: 20px;
+  background-color: var(--blue);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  transition: background-color 0.3s ease;
+}
+
+.boton-finalizar:hover {
+  background-color: #A7623C;
+}
+
+/* Logo y footer */
+.logo-superior-izquierda {
+  position: absolute;
+  top: 13px;
+  left: 20px;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.85);
+  padding: 1px 1px;
+  border-radius: 40px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.logo-superior-izquierda img {
+  height: 100px;
+  width: auto;
+  display: block;
+  cursor: pointer;
+}
+
+footer {
+  width: 100%;
+  background: linear-gradient(to right, #A7623C, #C08B51);
+  color: white;
+  text-align: center;
+  padding: 10px;
+  font-size: 15px;
+  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.2);
+  margin-top: auto;
+}

@@ -1,0 +1,9 @@
+Usuario invitado
+
+correo electronico: prueba5@gmail.com
+contraseña: prueba5
+
+Usuario admin (puede añadir y eliminar juegos)
+
+correo electronico: admin1@gmail.com
+contraseña: admin1
