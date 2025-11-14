@@ -1,7 +1,11 @@
-/* ========================================
-   GEAR STUDIO - ESTILOS BASE COMPARTIDOS
-   Patrón Steampunk/Dieselpunk
-   ======================================== */
+/* GEAR STUDIO - ESTILOS BASE COMPARTIDOS */
+
+@font-face {
+  font-family: 'FHACondensedFrench';
+  src: url('../src/fonts/FHACondensedFrench.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
 
 /* VARIABLES CSS GLOBALES */
 :root {
@@ -13,7 +17,7 @@
   --copper-metallic: #C89968;
   --inner-dark: #2A1F15;
   --inner-medium: #3D2817;
-  
+
   /* Compatibilidad con variables antiguas */
   --bg: #C89968;
   --panel: #B87333;
@@ -23,7 +27,7 @@
   --input-bg: #E8D7C3;
   --text: #1a1a1a;
   --muted: #555;
-  
+
   /* Sombras metalizadas */
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.25);
   --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.35);
@@ -38,7 +42,8 @@
   box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   height: 100%;
@@ -75,7 +80,8 @@ html, body {
 }
 
 /* HEADER */
-header, h1.titulo-pagina {
+header,
+h1.titulo-pagina {
   background: linear-gradient(135deg, #8B5A2B 0%, #B87333 30%, #D4AF37 50%, #B87333 70%, #8B5A2B 100%);
   color: white;
   text-align: center;
@@ -107,7 +113,8 @@ header, h1.titulo-pagina {
   box-shadow: var(--shadow-lg);
 }
 
-.logo-superior-izquierda a, .logo-superior-izquierda img {
+.logo-superior-izquierda a,
+.logo-superior-izquierda img {
   display: block;
 }
 
@@ -285,7 +292,8 @@ footer {
   border: 2px solid rgba(253, 217, 120, 0.2);
 }
 
-.modal-contenido h2, .modal-contenido h3 {
+.modal-contenido h2,
+.modal-contenido h3 {
   color: var(--accent);
   text-align: center;
   margin: 0 0 15px 0;
@@ -302,7 +310,9 @@ footer {
   letter-spacing: 0.5px;
 }
 
-.modal-contenido input, .modal-contenido textarea, .modal-contenido select {
+.modal-contenido input,
+.modal-contenido textarea,
+.modal-contenido select {
   width: 100%;
   padding: 12px 14px;
   font-size: 14px;
@@ -316,7 +326,9 @@ footer {
   transition: var(--transition);
 }
 
-.modal-contenido input:focus, .modal-contenido textarea:focus, .modal-contenido select:focus {
+.modal-contenido input:focus,
+.modal-contenido textarea:focus,
+.modal-contenido select:focus {
   outline: none;
   border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(253, 217, 120, 0.1);
@@ -361,8 +373,13 @@ footer {
 
 /* ANIMACIONES */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideIn {
@@ -370,6 +387,7 @@ footer {
     opacity: 0;
     transform: translateY(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -533,6 +551,7 @@ footer {
     opacity: 0;
     transform: translateX(-50%) translateY(-30px);
   }
+
   to {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
@@ -544,6 +563,7 @@ footer {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
   }
+
   to {
     opacity: 0;
     transform: translateX(-50%) translateY(-30px);
@@ -552,25 +572,27 @@ footer {
 
 /* RESPONSIVE BASE */
 @media (max-width: 768px) {
-  header, h1.titulo-pagina {
+
+  header,
+  h1.titulo-pagina {
     font-size: 22px;
     padding: 10px 0;
   }
-  
+
   nav {
     padding: 8px 10px;
     gap: 8px;
   }
-  
+
   nav button {
     font-size: 14px;
     padding: 8px 12px;
   }
-  
+
   .logo-superior-izquierda img {
     height: 80px;
   }
-  
+
   .usuario-superior-derecha {
     font-size: 14px;
     padding: 6px 10px;
@@ -579,41 +601,43 @@ footer {
 }
 
 @media (max-width: 480px) {
-  header, h1.titulo-pagina {
+
+  header,
+  h1.titulo-pagina {
     font-size: 18px;
     padding: 8px 0;
   }
-  
+
   nav {
     padding: 8px 5px;
     gap: 6px;
   }
-  
+
   nav button {
     font-size: 12px;
     padding: 6px 10px;
   }
-  
+
   main {
     padding: 12px 8px;
   }
-  
+
   .logo-superior-izquierda {
     top: 10px;
     left: 10px;
   }
-  
+
   .logo-superior-izquierda img {
     height: 70px;
   }
-  
+
   .usuario-superior-derecha {
     font-size: 12px;
     padding: 4px 8px;
     top: 20px;
     right: 10px;
   }
-  
+
   .modal-contenido {
     padding: 20px;
     width: 95%;
