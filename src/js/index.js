@@ -1,0 +1,122 @@
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+const supabase = createClient(
+  'https://ohjqmljmvufluqffhdye.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9oanFtbGptdnVmbHVxZmZoZHllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAzNTcyMDIsImV4cCI6MjA3NTkzMzIwMn0.16Ii3f1iICoVlA6_ZGLfnVBQjj3MCFhK4os0Rpy_kX0'
+);
+
+// Función para mostrar alertas personalizadas
+function showAlert(message, type = 'info', duration = 4000) {
+  let container = document.getElementById('alert-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'alert-container';
+    container.className = 'alert-container';
+    document.body.appendChild(container);
+  }
+
+  const alert = document.createElement('div');
+  alert.className = `alert ${type}`;
+  
+  // Crear contenedor del mensaje
+  const messageSpan = document.createElement('span');
+  messageSpan.textContent = message;
+  messageSpan.style.flex = '1';
+  
+  // Crear botón de cerrar
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'close-alert';
+  closeBtn.innerHTML = '×';
+  closeBtn.onclick = () => {
+    alert.style.animation = 'fadeOutAlert 0.4s ease-in forwards';
+    setTimeout(() => alert.remove(), 400);
+  };
+  
+  alert.appendChild(messageSpan);
+  alert.appendChild(closeBtn);
+  container.appendChild(alert);
+
+  // Auto-remover después del tiempo especificado
+  setTimeout(() => {
+    if (alert.parentElement) {
+      alert.style.animation = 'fadeOutAlert 0.4s ease-in forwards';
+      setTimeout(() => {
+        if (alert.parentElement) alert.remove();
+      }, 400);
+    }
+  }, duration);
+}
+
+window.validarLogin = async function (event) {
+  event.preventDefault();
+  const email = document.getElementById('user').value.trim();
+  const password = document.getElementById('pass').value.trim();
+
+  const { data, error: authError } = await supabase.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if (authError) {
+    showAlert("Usuario o contraseña incorrectos, o usuario no registrado.", 'error', 4000);
+  } else {
+    showAlert("¡Bienvenido! Redirigiendo...", 'success', 2000);
+    setTimeout(() => {
+      window.location.href = "pagina_principal.html";
+    }, 2000);
+  }
+};
+
+window.mostrarRegistro = function () {
+  document.querySelector(".login-form").style.display = "none";
+  document.querySelector(".registro-form").style.display = "flex";
+  document.querySelector(".panel button[type='button']").style.display = "none";
+};
+
+window.mostrarLogin = function () {
+  document.querySelector(".registro-form").style.display = "none";
+  document.querySelector(".login-form").style.display = "flex";
+  document.querySelector(".panel button[type='button']").style.display = "block";
+};
+
+window.registrarUsuario = async function (event) {
+  event.preventDefault();
+  const nombre = document.getElementById('new-name').value.trim();
+  const email = document.getElementById('new-user').value.trim();
+  const password = document.getElementById('new-pass').value.trim();
+
+  const { data, error: signUpError } = await supabase.auth.signUp({
+    email,
+    password
+  });
+
+  if (signUpError) {
+    showAlert("Error al registrar: " + signUpError.message, 'error', 4000);
+    return;
+  }
+
+  const { user } = data;
+
+  const { error: insertError } = await supabase
+    .from('usuario')
+    .insert([
+      {
+        id_usuario: user.id,
+        nombre_usuario: nombre,
+        email: email,
+        contrasena: password,
+        rol: "invitado",
+        fecha_registro: new Date().toISOString(),
+        imagen_perfil: "https://ohjqmljmvufluqffhdye.supabase.co/storage/v1/object/public/fotos_perfil/invitado.jpg"
+      }
+    ]);
+
+  if (insertError) {
+    showAlert("Usuario creado pero no guardado en la tabla: " + insertError.message, 'warning', 4000);
+  } else {
+    showAlert("Usuario registrado correctamente. Redirigiendo...", 'success', 2000);
+    setTimeout(() => {
+      window.location.href = "pagina_principal.html";
+    }, 2000);
+  }
+};

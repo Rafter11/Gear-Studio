@@ -812,3 +812,48 @@ footer {
         transition: none !important;
     }
 }
+
+/* Correo de contacto flotante */
+.contacto-flotante {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: linear-gradient(135deg, rgba(52, 84, 79, 0.95), rgba(52, 84, 79, 0.9));
+  border: 2px solid #C08B51;
+  border-radius: 12px;
+  padding: 16px 20px;
+  z-index: 50;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  font-family: 'FHACondensedFrench', "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  transition: all 0.3s ease;
+  max-width: 300px;
+}
+
+.contacto-flotante:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+  border-color: #fdd978;
+}
+
+.contacto-flotante p {
+  margin: 0 0 10px 0;
+  color: #f0f0f0;
+  font-size: 16px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.contacto-flotante a {
+  display: block;
+  text-align: center;
+  color: #fdd978;
+  font-size: 18px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.contacto-flotante a:hover {
+  color: #fff;
+  text-decoration: underline;
+}

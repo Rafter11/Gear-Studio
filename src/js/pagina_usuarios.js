@@ -1,0 +1,408 @@
+const client = supabase.createClient(
+  'https://ohjqmljmvufluqffhdye.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9oanFtbGptdnVmbHVxZmZoZHllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAzNTcyMDIsImV4cCI6MjA3NTkzMzIwMn0.16Ii3f1iICoVlA6_ZGLfnVBQjj3MCFhK4os0Rpy_kX0'
+);
+
+let usuarioActual = null;
+
+function abrirModalPerfil() {
+  document.getElementById("modal-perfil").style.display = "flex";
+}
+
+function cerrarModal() {
+  document.getElementById("modal-perfil").style.display = "none";
+}
+
+async function mostrarUsuario() {
+  const { data: { user } } = await client.auth.getUser();
+  if (!user) return;
+  usuarioActual = user;
+
+  const { data: perfil } = await client
+    .from('usuario')
+    .select('nombre_usuario, imagen_perfil')
+    .eq('id_usuario', user.id)
+    .single();
+
+  document.getElementById('usuario-nombre').textContent = perfil?.nombre_usuario || user.email;
+  document.getElementById('usuario-avatar').src =
+    perfil?.imagen_perfil || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(perfil?.nombre_usuario || user.email);
+
+  cargarAmigosDesdeLocal();
+  cargarAmigos();
+  cargarTodosLosUsuarios();
+  cargarNotificacionesUsuario();
+}
+
+async function cargarTodosLosUsuarios() {
+  const { data: usuarios } = await client
+    .from('usuario')
+    .select('id_usuario, nombre_usuario, email, imagen_perfil');
+
+  mostrarResultados(usuarios);
+}
+
+async function buscarUsuarios() {
+  const query = document.getElementById('busqueda-usuario').value.trim();
+  if (!query) {
+    cargarTodosLosUsuarios();
+    return;
+  }
+
+  const { data: resultados } = await client
+    .from('usuario')
+    .select('id_usuario, nombre_usuario, email, imagen_perfil')
+    .or(`nombre_usuario.ilike.%${query}%,email.ilike.%${query}%`);
+
+  mostrarResultados(resultados);
+}
+
+function mostrarResultados(usuarios) {
+  const contenedor = document.getElementById('resultados-usuarios');
+  contenedor.innerHTML = '';
+
+  usuarios.forEach(usuario => {
+    if (usuario.id_usuario === usuarioActual.id) return;
+
+    const card = document.createElement('div');
+    card.className = 'usuario-card';
+    card.innerHTML = `
+          <img src="${usuario.imagen_perfil || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(usuario.nombre_usuario)}" />
+          <h3>${usuario.nombre_usuario}</h3>
+          <p>${usuario.email}</p>
+          <button onclick="enviarSolicitud('${usuario.id_usuario}')">Añadir amigo</button>
+        `;
+    contenedor.appendChild(card);
+  });
+}
+
+async function enviarSolicitud(idAmigo) {
+  // 1. Comprobar si ya existe relación
+  const { data: relaciones } = await client
+    .from('amigos')
+    .select('estado')
+    .or(`and(id_usuario.eq.${usuarioActual.id},id_amigo.eq.${idAmigo}),and(id_usuario.eq.${idAmigo},id_amigo.eq.${usuarioActual.id})`);
+
+  if (relaciones && relaciones.length > 0) {
+    const estado = relaciones[0].estado;
+    if (estado === 'aceptado') {
+      alert("Ya sois amigos, no puedes enviar otra solicitud.");
+      return;
+    }
+    if (estado === 'pendiente') {
+      alert("Ya hay una solicitud pendiente.");
+      return;
+    }
+    if (estado === 'rechazado') {
+      alert("La solicitud fue rechazada. No puedes enviar otra.");
+      return;
+    }
+  }
+
+  // 2. Insertar en la tabla amigos
+  await client.from('amigos').insert({
+    id_usuario: usuarioActual.id,
+    id_amigo: idAmigo,
+    fecha_solicitud: new Date().toISOString(),
+    estado: 'pendiente'
+  });
+
+  // 3. Insertar notificación para el receptor
+  await client.from('notificacion').insert({
+    id_usuario: idAmigo,
+    tipo: 'Solicitud de amistad',
+    leida: false,
+    mensaje: `${usuarioActual.email} te ha enviado una solicitud de amistad`,
+    fecha: new Date().toISOString()
+  });
+
+  alert("Solicitud enviada");
+}
+
+function toggleNotificaciones(event) {
+  event.stopPropagation();
+  const lista = document.getElementById('notificaciones-lista');
+  if (lista.style.display === 'block') {
+    lista.style.display = 'none';
+  } else {
+    lista.style.display = 'block';
+    cargarNotificacionesUsuario();
+    marcarNotificacionesComoLeidas();
+  }
+}
+
+async function cargarSolicitudes() {
+  const { data: { user } } = await client.auth.getUser();
+  if (!user) return;
+
+  // Solicitudes recibidas
+  const { data: recibidas } = await client
+    .from('amigos')
+    .select('id_usuario, estado')
+    .eq('id_amigo', user.id)
+    .eq('estado', 'pendiente');
+
+  const ulRecibidas = document.getElementById('solicitudes-recibidas');
+  ulRecibidas.innerHTML = '';
+
+  for (const s of recibidas) {
+    const { data: perfil } = await client
+      .from('usuario')
+      .select('nombre_usuario')
+      .eq('id_usuario', s.id_usuario)
+      .single();
+
+    const li = document.createElement('li');
+    li.innerHTML = `
+                ${perfil?.nombre_usuario || s.id_usuario}
+                <button onclick="aceptarSolicitud('${s.id_usuario}')">Aceptar</button>
+                <button onclick="rechazarSolicitud('${s.id_usuario}')">Rechazar</button>
+                `;
+    ulRecibidas.appendChild(li);
+  }
+}
+
+async function aceptarSolicitud(idSolicitante) {
+  const { data: { user } } = await client.auth.getUser();
+  if (!user) return;
+
+  // Actualiza la solicitud original
+  await client
+    .from('amigos')
+    .update({ estado: 'aceptado' })
+    .eq('id_usuario', idSolicitante)
+    .eq('id_amigo', user.id);
+
+  await client.from('notificacion').insert({
+    id_usuario: idSolicitante,
+    tipo: 'Respuesta a la solicitud de amistad',
+    leida: false,
+    mensaje: `Tu solicitud ha sido aceptada por ${user.email}`,
+    fecha: new Date().toISOString()
+  });
+
+
+  alert("Solicitud aceptada. Ahora sois amigos.");
+  await cargarSolicitudes();
+  await cargarAmigos();
+}
+
+async function rechazarSolicitud(idSolicitante) {
+  const { data: { user } } = await client.auth.getUser();
+  if (!user) return;
+
+  await client
+    .from('amigos')
+    .update({ estado: 'rechazado' })
+    .eq('id_usuario', idSolicitante)
+    .eq('id_amigo', user.id);
+
+  await client.from('notificacion').insert({
+    id_usuario: idSolicitante,
+    tipo: 'Respuesta a la solicitud de amistad',
+    leida: false,
+    mensaje: `Tu solicitud ha sido rechazada por ${user.email}`,
+    fecha: new Date().toISOString()
+  });
+
+
+  alert("Solicitud rechazada.");
+  cargarSolicitudes();
+}
+
+async function cargarAmigos() {
+  const { data: { user } } = await client.auth.getUser();
+  if (!user) return;
+
+  const { data: relaciones } = await client
+    .from('amigos')
+    .select('id_usuario, id_amigo, estado')
+    .eq('estado', 'aceptado')
+    .or(`id_usuario.eq.${user.id},id_amigo.eq.${user.id}`);
+
+  // IDs únicos
+  const amigosIds = [...new Set(relaciones.map(r =>
+    r.id_usuario === user.id ? r.id_amigo : r.id_usuario
+  ))];
+
+  localStorage.setItem("misAmigos", JSON.stringify(amigosIds));
+  mostrarAmigos(amigosIds);
+}
+
+function mostrarAmigos(amigosIds) {
+  const ul = document.getElementById('lista-amigos');
+  ul.innerHTML = '';
+
+  amigosIds.forEach(async id => {
+    if (id === usuarioActual.id) return;
+    const { data: perfil } = await client
+      .from('usuario')
+      .select('nombre_usuario, imagen_perfil')
+      .eq('id_usuario', id)
+      .single();
+
+    if (!perfil) return; // evita añadir si no hay datos
+
+    if (ul.querySelector(`li[data-id="${id}"]`)) return;
+    
+    const li = document.createElement('li');
+    
+    li.setAttribute('data-id', id);
+
+    li.innerHTML = `
+                <img src="${perfil.imagen_perfil || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(perfil.nombre_usuario)}"
+                    style="width:24px;height:24px;border-radius:50%;margin-right:8px;vertical-align:middle;" />
+                <span onclick="abrirChat('${id}')">${perfil.nombre_usuario}</span>
+                <button onclick="eliminarAmigo('${id}')">❌</button>
+                `;
+    ul.appendChild(li);
+  });
+}
+
+async function eliminarAmigo(idAmigo) {
+  const { data: { user } } = await client.auth.getUser();
+  if (!user) return;
+
+  // Borra cualquier relación aceptada entre ambos
+  await client
+    .from('amigos')
+    .delete()
+    .or(`and(id_usuario.eq.${user.id},id_amigo.eq.${idAmigo}),and(id_usuario.eq.${idAmigo},id_amigo.eq.${user.id})`);
+
+  alert("Amigo eliminado.");
+  await cargarAmigos();
+}
+
+
+function cargarAmigosDesdeLocal() {
+  const amigosGuardados = localStorage.getItem("misAmigos");
+  if (amigosGuardados) {
+    const amigosIds = JSON.parse(amigosGuardados);
+    mostrarAmigos(amigosIds);
+  }
+}
+
+function abrirChat(idAmigo) {
+  window.location.href = `pagina_chats.html?id_amigo=${idAmigo}`;
+}
+
+async function cargarNotificacionesUsuario() {
+  if (!usuarioActual || !usuarioActual.id) return;
+
+  const { data: notificaciones, error } = await client
+    .from('notificacion')
+    .select('id_notificacion, tipo, leida, mensaje, fecha')
+    .eq('id_usuario', usuarioActual.id)
+    .order('fecha', { ascending: false });
+
+
+  if (error) {
+    console.error("Error al cargar notificaciones:", error.message);
+    return;
+  }
+
+  const lista = document.getElementById('notificaciones-lista');
+  lista.innerHTML = '';
+
+  if (!notificaciones || notificaciones.length === 0) {
+    lista.innerHTML = '<div class="notificacion-item">No tienes notificaciones</div>';
+  } else {
+    notificaciones.forEach(n => {
+      const item = document.createElement('div');
+      item.className = 'notificacion-item';
+      item.innerHTML = `
+                        <strong>${n.tipo}</strong><br>
+                        ${n.mensaje}<br>
+                        <small>${new Date(n.fecha).toLocaleString()}</small>
+                    `;
+      item.onclick = (e) => {
+        e.stopPropagation();
+      };
+      if (!n.leida) {
+        item.style.fontWeight = 'bold';
+      }
+      lista.appendChild(item);
+    });
+  }
+
+  // Actualizar contador en la campana
+  const noLeidas = notificaciones.filter(n => !n.leida).length;
+  document.getElementById('notificaciones-icono').textContent = `🔔 (${noLeidas})`;
+}
+
+async function marcarNotificacionesComoLeidas() {
+  if (!usuarioActual || !usuarioActual.id) return;
+
+  await client
+    .from('notificacion')
+    .update({ leida: true })
+    .eq('id_usuario', usuarioActual.id)
+    .eq('leida', false);
+}
+
+async function cargarFormEditar() {
+  const { data: { user }, error } = await client.auth.getUser();
+  if (error || !user) return;
+
+  const { data: perfil, error: errorPerfil } = await client
+    .from('usuario')
+    .select('nombre_usuario, email, contrasena, imagen_perfil')
+    .eq('id_usuario', user.id)
+    .single();
+
+  if (errorPerfil || !perfil) return;
+
+  document.getElementById('nombre').value = perfil.nombre_usuario || "";
+  document.getElementById('correo').value = perfil.email || "";
+  document.getElementById('contrasena').value = perfil.contrasena || "";
+}
+
+document.getElementById('usuario-info').addEventListener('click', async () => {
+  await cargarFormEditar();
+  document.getElementById('modal-perfil').style.display = "flex";
+});
+
+document.getElementById("form-editar").addEventListener("submit", async function (e) {
+  e.preventDefault();
+  const nombre = document.getElementById("nombre").value.trim();
+  const correo = document.getElementById("correo").value.trim();
+  const contrasena = document.getElementById("contrasena").value.trim();
+  const archivo = document.getElementById("foto").files[0];
+
+  const { data: { user }, error: userError } = await client.auth.getUser();
+  if (userError || !user) return;
+
+  let nuevaUrlFoto = null;
+  if (archivo) {
+    const nombreArchivo = `${user.id}_${Date.now()}.${archivo.name.split('.').pop()}`;
+    const { error: uploadError } = await client.storage.from('fotos_perfil').upload(nombreArchivo, archivo, { cacheControl: '3600', upsert: true });
+    if (uploadError) {
+      alert("Error al subir la foto: " + uploadError.message);
+      return;
+    }
+    const { data } = client.storage.from('fotos_perfil').getPublicUrl(nombreArchivo);
+    nuevaUrlFoto = data.publicUrl;
+  }
+
+  await client.from('usuario').update({
+    ...(nombre && { nombre_usuario: nombre }),
+    ...(correo && { email: correo }),
+    ...(nuevaUrlFoto && { imagen_perfil: nuevaUrlFoto }),
+    ...(contrasena && { contrasena: contrasena })
+  }).eq('id_usuario', user.id);
+
+  if (correo || contrasena) {
+    await client.auth.updateUser({
+      ...(correo && { email: correo }),
+      ...(contrasena && { password: contrasena })
+    });
+  }
+
+  if (nuevaUrlFoto) document.getElementById('usuario-avatar').src = nuevaUrlFoto;
+  if (nombre) document.getElementById('usuario-nombre').textContent = nombre;
+  cerrarModal();
+});
+
+cargarSolicitudes();
+mostrarUsuario();
+cargarNotificacionesUsuario();
