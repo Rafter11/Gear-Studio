@@ -18,6 +18,57 @@
     }
   </style>
 
+</head>
+
+<body>
+  <video autoplay muted loop id="video-fondo">
+    <source src="src/video/Gears_login_video.mp4" type="video/mp4" />
+  </video>
+  <div class="video-overlay"></div>
+
+  <!-- Contenedor de alertas personalizadas -->
+  <div id="alert-container" class="alert-container"></div>
+
+  <div class="page">
+    <main class="hero">
+      <aside class="panel-wrap steampunk-font">
+        <section class="panel">
+          <div class="welcome">Bienvenida</div>
+          <img src="src/img/invitado.jpg" alt="Foto invitado steampunk" class="avatar-img" />
+
+          <!-- Login -->
+          <form class="login-form" onsubmit="return validarLogin(event)">
+            <input id="user" name="user" class="input" type="email" placeholder="correo electrónico" required>
+            <input id="pass" name="pass" class="input" type="password" placeholder="contraseña" required>
+            <button type="submit" class="submit">Entrar</button>
+            <button type="button" class="submit" onclick="mostrarRegistro()">¿No tienes cuenta? Regístrate</button>
+          </form>
+
+          <!-- Registro -->
+          <form class="registro-form" onsubmit="return registrarUsuario(event)" style="display:none;">
+            <input id="new-name" name="new-name" class="input" type="text" placeholder="nuevo nombre de usuario"
+              required>
+            <input id="new-user" name="new-user" class="input" type="email" placeholder="nuevo correo electrónico"
+              required>
+            <input id="new-pass" name="new-pass" class="input" type="password" placeholder="nueva contraseña" required>
+            <button type="submit" class="submit">Registrarse</button>
+            <button type="button" class="submit" onclick="mostrarLogin()">¿Ya tienes cuenta? Inicia sesión</button>
+          </form>
+
+        </section>
+      </aside>
+
+      <section class="logo-area">
+        <div class="logo-wrapper">
+          <img src="src/img/login_circle.png" alt="Decoración steampunk" class="logo-circle" />
+          <div class="logo-bg"></div>
+          <img src="src/img/Gear_Studio_Logo_black.png" alt="Logo Gear Studio" class="logo-img" />
+        </div>
+      </section>
+    </main>
+
+    <!-- Alertas personalizadas (contenedor) -->
+  </div>
 
   <script type="module" src="src/js/index.js"></script>
 </body>
