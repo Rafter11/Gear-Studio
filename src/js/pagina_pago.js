@@ -42,9 +42,14 @@ function showAlert(message, type = 'info', duration = 4000) {
   }, duration);
 }
 
+// Extra el ID del juego, que se usa para cargar su info después
 const params = new URLSearchParams(window.location.search);
 const id_juego = params.get('id_juego');
 
+/* 
+ * Obtiene le usuario, consulta tabla juego para mostrar su info, busca su categoria,
+ * muestra su info en la interfaz, consulta el método de pago y si no lo hay puedes añadirlo
+ */
 async function cargarDatos() {
   const { data: { user } } = await client.auth.getUser();
   if (!user) return;
@@ -91,6 +96,10 @@ async function cargarDatos() {
   }
 }
 
+/* 
+ * Obtiene el usuario y el emtodo de pago, obtieneel precio del juego, inserta la compra en su tabla,
+ * inserta en biblioteca el juego, muestra una alerta y te envia a pagina_biblioteca.html
+ */
 async function finalizarCompra() {
   const { data: { user } } = await client.auth.getUser();
   const id_metodo = document.getElementById('metodo-pago').value;
@@ -117,6 +126,7 @@ async function finalizarCompra() {
   }, 3000);
 }
 
+// Añadir un nuevo método de pago. Valida que los campos de tipo y detalles no estén vacíos y se guarda si no hay error
 document.getElementById('form-metodo').addEventListener('submit', async (e) => {
   e.preventDefault();
 
@@ -147,4 +157,5 @@ document.getElementById('form-metodo').addEventListener('submit', async (e) => {
   cargarDatos();
 });
 
+// Iniciañización
 cargarDatos();

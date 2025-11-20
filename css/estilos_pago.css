@@ -41,7 +41,7 @@ body {
   min-height: 100vh;
 }
 
-/* Fondo de video */
+/* Video de fondo */
 #video-fondo {
   position: fixed;
   top: 0;
@@ -64,7 +64,7 @@ body {
   z-index: -1;
 }
 
-/* Layout principal */
+/* principal */
 main.pago-layout {
   display: flex;
   justify-content: center;
@@ -293,7 +293,7 @@ footer {
     background: linear-gradient(to bottom, #D9976F, #B8755E);
 }
 
-/* Media Queries - Responsive Design */
+/* Media Queries */
 @media (max-width: 1200px) {
     main.pago-layout {
         gap: 40px;

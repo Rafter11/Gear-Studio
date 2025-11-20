@@ -160,6 +160,47 @@ async function cargarSolicitudes() {
                 `;
     ulRecibidas.appendChild(li);
   }
+
+  // Solicitudes enviadas
+  const { data: enviadas } = await client
+    .from('amigos')
+    .select('id_amigo, estado')
+    .eq('id_usuario', user.id)
+    .eq('estado', 'pendiente');
+
+  const ulEnviadas = document.getElementById('solicitudes-enviadas');
+  ulEnviadas.innerHTML = '';
+
+  for (const s of enviadas) {
+    const { data: perfil } = await client
+      .from('usuario')
+      .select('nombre_usuario')
+      .eq('id_usuario', s.id_amigo)
+      .single();
+
+    const li = document.createElement('li');
+    li.innerHTML = `
+      ${perfil?.nombre_usuario || s.id_amigo}
+      <span style="color: black;">(pendiente)</span>
+      <button onclick="cancelarSolicitud('${s.id_amigo}')">Cancelar</button>
+    `;
+    ulEnviadas.appendChild(li);
+  }
+}
+
+async function cancelarSolicitud(idAmigo) {
+  const { data: { user } } = await client.auth.getUser();
+  if (!user) return;
+
+  await client
+    .from('amigos')
+    .delete()
+    .eq('id_usuario', user.id)
+    .eq('id_amigo', idAmigo)
+    .eq('estado', 'pendiente');
+
+  alert("Solicitud cancelada.");
+  cargarSolicitudes();
 }
 
 async function aceptarSolicitud(idSolicitante) {

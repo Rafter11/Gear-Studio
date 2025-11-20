@@ -47,6 +47,7 @@ function showAlert(message, type = 'info', duration = 4000) {
   }, duration);
 }
 
+// Captura del formulario
 window.validarLogin = async function (event) {
   event.preventDefault();
   const email = document.getElementById('user').value.trim();
@@ -67,6 +68,7 @@ window.validarLogin = async function (event) {
   }
 };
 
+// Alternar entre login y registro
 window.mostrarRegistro = function () {
   document.querySelector(".login-form").style.display = "none";
   document.querySelector(".registro-form").style.display = "flex";
@@ -79,12 +81,14 @@ window.mostrarLogin = function () {
   document.querySelector(".panel button[type='button']").style.display = "block";
 };
 
+// Registro de neuvos usuarios
 window.registrarUsuario = async function (event) {
   event.preventDefault();
   const nombre = document.getElementById('new-name').value.trim();
   const email = document.getElementById('new-user').value.trim();
   const password = document.getElementById('new-pass').value.trim();
 
+  // Acceder a Supabase Auth y crear el usuario
   const { data, error: signUpError } = await supabase.auth.signUp({
     email,
     password

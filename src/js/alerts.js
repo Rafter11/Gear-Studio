@@ -1,8 +1,3 @@
-/**
- * Sistema de Alertas Personalizadas para Gear Studio
- * Reemplaza los alerts() tradicionales por alertas estilizadas
- */
-
 function showAlert(message, type = 'info', duration = 4000) {
   // Buscar o crear el contenedor de alertas
   let container = document.getElementById('alert-container');

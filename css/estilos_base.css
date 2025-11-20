@@ -413,7 +413,7 @@ footer {
   background: #f0c85c;
 }
 
-/* ALERTAS PERSONALIZADAS - Bootstrap 5 Style */
+/* ALERTAS PERSONALIZADAS */
 .alert-container {
   position: fixed;
   top: 30px;
@@ -570,7 +570,7 @@ footer {
   }
 }
 
-/* RESPONSIVE BASE */
+/* Media Queries */
 @media (max-width: 768px) {
 
   header,

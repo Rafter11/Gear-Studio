@@ -1,7 +1,20 @@
-Usuario invitado
+Usuarios invitados
+
+correo electronico: miguel@gmail.com
+contraseña: miguel
+
+correo electronico: sergio@gmail.com
+contraseña: sergio
 
 correo electronico: prueba5@gmail.com
 contraseña: prueba5
+
+correo electronico: tamara@gmail.com
+contraseña: tamara
+
+correo electronico: rafael@gmail.com
+contraseña: rafael
+
 
 Usuario admin (puede añadir y eliminar juegos)
 

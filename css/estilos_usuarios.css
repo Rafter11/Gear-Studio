@@ -635,7 +635,7 @@ footer {
     background-color: #aaa;
 }
 
-/* MEDIA QUERIES PARA RESPONSIVE */
+/* Media Queries */
 @media (max-width: 1200px) {
     #barra-amigos {
         width: 250px;
@@ -790,7 +790,7 @@ footer {
     animation: fadeIn 0.3s ease-out;
 }
 
-/* SCROLLBAR MEJORADO */
+/* SCROLLBAR  */
 #barra-amigos::-webkit-scrollbar,
 #notificaciones-lista::-webkit-scrollbar {
     width: 6px;

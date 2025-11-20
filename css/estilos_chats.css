@@ -40,7 +40,7 @@ button {
     font-family: 'FHACondensedFrench', "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
-/* Fondo de video */
+/* Video de fondo */
 #video-fondo {
     position: fixed;
     top: 0;
@@ -464,7 +464,7 @@ nav button:hover {
     transition: var(--transition);
 }
 
-/* Modal de chat más grande */
+/* Modal de chat */
 #modal-chat .modal-contenido {
     background: linear-gradient(135deg, var(--inner), rgba(52, 84, 79, 0.95));
     padding: 24px;
@@ -667,7 +667,7 @@ footer {
     background: linear-gradient(to bottom, #D9976F, #B8755E);
 }
 
-/* Media Queries - Responsive Design */
+/* Media Queries */
 @media (max-width: 1200px) {
     #barra-chats {
         width: 280px;

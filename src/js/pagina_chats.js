@@ -42,19 +42,23 @@ function showAlert(message, type = 'info', duration = 4000) {
   }, duration);
 }
 
+// Variables globales
 let usuarioActual = null;
 let chatActivo = null;
 let nombreChatActivo = '';
 let avatarChatActivo = '';
 
+// Abrir modal
 function abrirModalPerfil() {
   document.getElementById("modal-perfil").style.display = "flex";
 }
 
+// Cerrar modal
 function cerrarModal() {
   document.getElementById("modal-perfil").style.display = "none";
 }
 
+// Formulario de editar perfil
 document.getElementById("form-editar").addEventListener("submit", async function (e) {
   e.preventDefault();
   const nombre = document.getElementById("nombre").value.trim();
@@ -93,6 +97,7 @@ document.getElementById("form-editar").addEventListener("submit", async function
   cerrarModal();
 });
 
+// Notificaciones
 function toggleNotificaciones(event) {
   event.stopPropagation();
   const lista = document.getElementById('notificaciones-lista');
@@ -110,6 +115,7 @@ document.addEventListener('click', () => {
   if (lista) lista.style.display = 'none';
 });
 
+// Obtiene los usuarios, muestra el nombre, su foto y llama a cargarChats()
 async function mostrarUsuario() {
   const { data: { user } } = await client.auth.getUser();
   if (!user) return;
@@ -128,6 +134,7 @@ async function mostrarUsuario() {
   cargarChats();
 }
 
+// Obtiene los IDs de amigos, consulta la tabla usuario para mostrar su nombre y clci en amigo, abre el chat
 async function cargarChats() {
   const amigosGuardados = localStorage.getItem("misAmigos");
   const ul = document.getElementById('lista-chats');
@@ -160,6 +167,7 @@ async function cargarChats() {
   }
 }
 
+// Abre el chat
 function abrirChat(idAmigo, nombreAmigo, avatarAmigo) {
   chatActivo = idAmigo;
   nombreChatActivo = nombreAmigo;
@@ -169,6 +177,7 @@ function abrirChat(idAmigo, nombreAmigo, avatarAmigo) {
   cargarMensajes(idAmigo, nombreAmigo, avatarAmigo);
 }
 
+// Cierra el chat
 function cerrarModalChat() {
   document.getElementById('modal-chat').style.display = 'none';
   chatActivo = null;
@@ -176,6 +185,7 @@ function cerrarModalChat() {
   avatarChatActivo = '';
 }
 
+// Consulta la tabla mensaje, ordena los mensajes por fecha de los dos usuarios y los muestra
 async function cargarMensajes(idAmigo, nombreAmigo, avatarAmigo) {
   const { data: { user } } = await client.auth.getUser();
   if (!user) return;
@@ -211,6 +221,7 @@ async function cargarMensajes(idAmigo, nombreAmigo, avatarAmigo) {
   });
 }
 
+// Inserta un nuevo mensaje
 async function enviarMensaje() {
   const contenido = document.getElementById('mensaje-input').value.trim();
   if (!contenido || !chatActivo) return;
@@ -226,10 +237,11 @@ async function enviarMensaje() {
   });
 
   document.getElementById('mensaje-input').value = '';
-  // Reusar el nombre y avatar activos para pintar correctamente
-  cargarMensajes(chatActivo, nombreChatActivo, avatarChatActivo);
+
+  cargarMensajes(chatActivo, nombreChatActivo, avatarChatActivo);  // Reusar el nombre y avatar para pintar bien
 }
 
+// Muestra un modal con los usuarios con los que puedes iniciar una conversacion
 function abrirModalNuevoChat() {
   const amigosGuardados = localStorage.getItem("misAmigos");
   const lista = document.getElementById("lista-amigos-chat");
@@ -266,10 +278,12 @@ function abrirModalNuevoChat() {
   document.getElementById("modal-nuevo-chat").style.display = "flex";
 }
 
+// Cierra el modal
 function cerrarModalNuevoChat() {
   document.getElementById("modal-nuevo-chat").style.display = "none";
 }
 
+// Carga las notificaciones del usuario actual
 async function cargarNotificacionesUsuario() {
   const { data: { user } } = await client.auth.getUser();
   if (!user) return;
@@ -316,5 +330,6 @@ async function marcarNotificacionesComoLeidas() {
     .eq('leida', false);
 }
 
+// Iniciación
 mostrarUsuario();
 cargarNotificacionesUsuario();

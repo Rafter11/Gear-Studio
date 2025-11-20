@@ -41,9 +41,11 @@ function showAlert(message, type = 'info', duration = 4000) {
   }, duration);
 }
 
+// Variables globales
 let juegoActualId = null;
 let juegosMap = {};
 
+// Obtener el usuario, se consultan los juegos de este y se muestra su info
 async function cargarBiblioteca() {
   const { data: { user } } = await client.auth.getUser();
   if (!user) return;
@@ -78,6 +80,7 @@ async function cargarBiblioteca() {
   }
 }
 
+// Obtener el usuario y mostrar su información en el modal. También el nombre en el título
 async function mostrarUsuario() {
   const { data: { user }, error } = await client.auth.getUser();
   if (error || !user) return;
@@ -109,6 +112,7 @@ function cerrarModal() {
   document.getElementById("modal-perfil").style.display = "none";
 }
 
+// Formulario de editar perfil. Guarda foto en bucket y actualiza usuarios y Supabase Auth
 document.getElementById("form-editar").addEventListener("submit", async function (e) {
   e.preventDefault();
   const nombre = document.getElementById("nombre").value.trim();
@@ -147,6 +151,7 @@ document.getElementById("form-editar").addEventListener("submit", async function
   cerrarModal();
 });
 
+// Filtros y busqueda de juegos
 async function filtrarBiblioteca() {
   const nombre = document.getElementById('busqueda-nombre').value.trim();
   const categoria = document.getElementById('filtro-categoria').value;
@@ -204,6 +209,7 @@ async function filtrarBiblioteca() {
   });
 }
 
+// Consulta categorías y rellena el desplegable
 async function cargarCategorias() {
   const { data } = await client.from('categoria').select('nombre_categoria');
   const select = document.getElementById('filtro-categoria');
@@ -215,6 +221,7 @@ async function cargarCategorias() {
   });
 }
 
+// Selecciona un juego aleatorio con toda su info
 async function juegoAleatorio() {
   const { data: juegos, error } = await client
     .from('juego')
@@ -230,6 +237,7 @@ async function juegoAleatorio() {
   abrirModalCompra(aleatorio.id_juego);
 }
 
+// Modal de compra, muestra detalles del juego y confirma la compra
 async function abrirModalCompra(id_juego) {
   const juego = juegosMap[id_juego];
   if (!juego) return;
@@ -261,10 +269,12 @@ async function abrirModalCompra(id_juego) {
   document.getElementById('modal-compra').style.display = 'flex';
 }
 
+// Cerrar modal de compra
 function cerrarModalCompra() {
   document.getElementById('modal-compra').style.display = 'none';
 }
 
+// Abre y cierra notificaciones
 function toggleNotificaciones(event) {
   event.stopPropagation();
   const lista = document.getElementById('notificaciones-lista');
@@ -282,6 +292,7 @@ document.addEventListener('click', () => {
   if (lista) lista.style.display = 'none';
 });
 
+// Carga notificaciones del usuario de la tabla
 async function cargarNotificacionesUsuario() {
   const { data: { user } } = await client.auth.getUser();
   if (!user) return;
@@ -319,6 +330,7 @@ async function cargarNotificacionesUsuario() {
   document.getElementById('notificaciones-icono').textContent = `🔔 (${noLeidas})`;
 }
 
+// Marca como leidas las notificaciones
 async function marcarNotificacionesComoLeidas() {
   const { data: { user } } = await client.auth.getUser();
   if (!user) return;
@@ -330,16 +342,19 @@ async function marcarNotificacionesComoLeidas() {
     .eq('leida', false);
 }
 
+// Redirige a pagina_pago.html
 function confirmarCompra() {
   if (juegoActualId) {
     window.location.href = `pagina_pago.html?id_juego=${juegoActualId}`;
   }
 }
 
+// Muestra alerta de descarga
 function descargarJuego(nombreJuego) {
   showAlert(`🔽 Descargando "${nombreJuego}"...`, 'info', 3000);
 }
 
+// Inicialización
 cargarCategorias();
 mostrarUsuario();
 cargarBiblioteca();

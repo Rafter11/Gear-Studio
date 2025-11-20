@@ -12,11 +12,11 @@ function showAlert(message, type = 'info', duration = 4000) {
 
   const alert = document.createElement('div');
   alert.className = `alert ${type}`;
-  
+
   const messageSpan = document.createElement('span');
   messageSpan.textContent = message;
   messageSpan.style.flex = '1';
-  
+
   const closeBtn = document.createElement('button');
   closeBtn.className = 'close-alert';
   closeBtn.innerHTML = '×';
@@ -24,7 +24,7 @@ function showAlert(message, type = 'info', duration = 4000) {
     alert.style.animation = 'fadeOutAlert 0.4s ease-in forwards';
     setTimeout(() => alert.remove(), 400);
   };
-  
+
   alert.appendChild(messageSpan);
   alert.appendChild(closeBtn);
   container.appendChild(alert);
@@ -39,13 +39,15 @@ function showAlert(message, type = 'info', duration = 4000) {
   }, duration);
 }
 
+// Variables globales
 let juegoActualId = null;
 let juegosMap = {};
-let esAdmin = false; // global
+let esAdmin = false;
 let juegoEditando = null;
 
 document.getElementById('busqueda-nombre').addEventListener('input', cargarJuegos);
 
+// Gestión de perfil del usuario
 document.getElementById('usuario-info').addEventListener('click', async function () {
   const { data: { user }, error } = await client.auth.getUser();
   if (error || !user) return;
@@ -62,6 +64,7 @@ function cerrarModal() {
   document.getElementById('modal-perfil').style.display = 'none';
 }
 
+// Formulario de editar usuario
 document.getElementById('form-editar').addEventListener('submit', async function (e) {
   e.preventDefault();
   const nombre = document.getElementById('nombre').value.trim();
@@ -99,6 +102,7 @@ document.getElementById('form-editar').addEventListener('submit', async function
   cerrarModal();
 });
 
+// Consulta al tabla categoria
 async function cargarCategorias() {
   const { data, error } = await client.from('categoria').select('id_categoria, nombre_categoria');
   if (error) return;
@@ -112,6 +116,7 @@ async function cargarCategorias() {
   });
 }
 
+// Consula la categoría para editar el juego
 async function cargarCategoriasParaEditar(id_juego) {
   const { data: categorias, error } = await client.from('categoria').select('id_categoria, nombre_categoria');
   if (error) return;
@@ -132,6 +137,7 @@ async function cargarCategoriasParaEditar(id_juego) {
   }
 }
 
+// Consula la categoría para añadir el juego
 async function cargarCategoriasParaNuevoJuego() {
   const { data: categorias, error } = await client.from('categoria').select('id_categoria, nombre_categoria');
   if (error) return;
@@ -146,6 +152,7 @@ async function cargarCategoriasParaNuevoJuego() {
   });
 }
 
+// Aplica filtros, consulta la tabla juego y muestra las tarjetas de estos. Si eres admin podras crear y editar los juegos
 async function cargarJuegos() {
   const nombre = document.getElementById('busqueda-nombre').value.trim();
   const categoria = document.getElementById('filtro-categoria').value;
@@ -221,6 +228,7 @@ async function cargarJuegos() {
   });
 }
 
+// Obtiene el usuario desde su tabla, muestra el avatar y el nombre. Si el rol es admin, aplica la edición y creación de juegos
 async function mostrarUsuario() {
   const { data: { user }, error } = await client.auth.getUser();
   if (error || !user) return;
@@ -245,6 +253,7 @@ function cerrarModalCompra() {
   document.getElementById('modal-compra').style.display = 'none';
 }
 
+// Modal de compra, carga las reseñas de los juegos. Contiene el boton de confirmar compra que redirige a pagina_pago.html
 async function abrirModalCompra(id_juego) {
   const juego = juegosMap[id_juego];
   if (!juego) return;
@@ -281,6 +290,7 @@ function confirmarCompra() {
   window.location.href = `pagina_pago.html?id_juego=${juegoActualId}`;
 }
 
+// Reseñas. Inserta en la tabla sereña la fecha, el usuario y el texto escrito.
 document.getElementById('form-reseña').addEventListener('submit', async function (e) {
   e.preventDefault();
 
@@ -317,11 +327,13 @@ document.getElementById('form-reseña').addEventListener('submit', async functio
   document.getElementById('form-reseña').reset();
 });
 
+// Da formato a la fecha (DD-MM-YYYY), ya que de normal está al reves (YYYY-MM-DD)
 function formatearFecha(fechaISO) {
   const opciones = { day: 'numeric', month: 'short', year: 'numeric' };
   return new Date(fechaISO).toLocaleDateString('es-ES', opciones);
 }
 
+// Carga las reseñas existentes
 async function cargarReseñas(id_juego) {
   const contenedor = document.getElementById('lista-reseñas');
   contenedor.innerHTML = '<p>Cargando reseñas...</p>';
@@ -361,6 +373,7 @@ async function cargarReseñas(id_juego) {
   });
 }
 
+// Notificaciones. Abre y cierra la lista
 function toggleNotificaciones(event) {
   event.stopPropagation();
   const lista = document.getElementById('notificaciones-lista');
@@ -378,6 +391,7 @@ document.addEventListener('click', () => {
   if (lista) lista.style.display = 'none';
 });
 
+// Carga notificaciones de su tabla
 async function cargarNotificacionesUsuario() {
   const { data: { user } } = await client.auth.getUser();
   if (!user) return;
@@ -415,6 +429,7 @@ async function cargarNotificacionesUsuario() {
   document.getElementById('notificaciones-icono').textContent = `🔔 (${noLeidas})`;
 }
 
+// Marca notificaciones como leidas
 async function marcarNotificacionesComoLeidas() {
   const { data: { user } } = await client.auth.getUser();
   if (!user) return;
@@ -426,6 +441,7 @@ async function marcarNotificacionesComoLeidas() {
     .eq('leida', false);
 }
 
+// Función de admin. Editar le juego, cambiando sus datos
 function abrirModalEditar(id_juego) {
   const juego = juegosMap[id_juego];
   if (!juego) return;
@@ -435,7 +451,7 @@ function abrirModalEditar(id_juego) {
   document.getElementById('editar-descripcion').value = juego.descripcion;
   document.getElementById('editar-precio').value = juego.precio;
   document.getElementById('editar-desarrollador').value = juego.desarrollador;
-  
+
   // Cargar fecha de publicación
   if (juego.fecha_publicacion) {
     document.getElementById('editar-fecha-publicacion').value = juego.fecha_publicacion;
@@ -452,30 +468,31 @@ function cerrarModalEditar() {
   juegoEditando = null;
 }
 
+// Función de admin, Borra el juego y todas sus relaciones
 async function eliminarJuego() {
   if (!juegoEditando) return;
-  
+
   const nombreJuego = document.getElementById('editar-nombre').value;
   const confirmar = confirm(`¿Estás seguro de que deseas eliminar el juego "${nombreJuego}"? Esta acción no se puede deshacer.`);
-  
+
   if (!confirmar) return;
 
   try {
     // Eliminar relaciones en juego_categoria
     await client.from('juego_categoria').delete().eq('id_juego', juegoEditando);
-    
+
     // Eliminar reseñas del juego
     await client.from('reseña').delete().eq('id_juego', juegoEditando);
-    
+
     // Eliminar compras del juego
     await client.from('compra').delete().eq('id_juego', juegoEditando);
-    
+
     // Eliminar de la biblioteca
     await client.from('biblioteca').delete().eq('id_juego', juegoEditando);
-    
+
     // Finalmente, eliminar el juego
     const { error } = await client.from('juego').delete().eq('id_juego', juegoEditando);
-    
+
     if (error) {
       showAlert("Error al eliminar juego: " + error.message, 'error', 3000);
     } else {
@@ -488,6 +505,7 @@ async function eliminarJuego() {
   }
 }
 
+// Formulario de edicion de juego
 document.getElementById('form-editar-juego').addEventListener('submit', async function (e) {
   e.preventDefault();
   if (!juegoEditando) return;
@@ -517,17 +535,17 @@ document.getElementById('form-editar-juego').addEventListener('submit', async fu
     const { data: categoriaInsertada, error: errorInsert } = await client.from('categoria').insert([{
       nombre_categoria: nuevaCategoria
     }]).select();
-    
+
     if (errorInsert) {
       showAlert("Error al crear categoría: " + errorInsert.message, 'error', 3000);
       return;
     }
-    
+
     if (!categoriaInsertada || categoriaInsertada.length === 0) {
       showAlert("Error: No se pudo crear la categoría correctamente", 'error', 3000);
       return;
     }
-    
+
     idCategoria = categoriaInsertada[0].id_categoria;
     showAlert("Nueva categoría creada: " + nuevaCategoria, 'success', 2000);
   } else if (!categoriaSelect && !nuevaCategoria) {
@@ -567,7 +585,7 @@ document.getElementById('form-editar-juego').addEventListener('submit', async fu
   }
 });
 
-// Nuevo juego: abrir/cerrar + guardar
+// Abrir, cerrar y guardar el nuevo juego
 function abrirModalNuevoJuego() {
   cargarCategoriasParaNuevoJuego();
   document.getElementById('modal-nuevo-juego').style.display = 'block';
@@ -576,6 +594,7 @@ function cerrarModalNuevoJuego() {
   document.getElementById('modal-nuevo-juego').style.display = 'none';
 }
 
+// Formulario del juego nuevo
 document.getElementById('form-nuevo-juego').addEventListener('submit', async function (e) {
   e.preventDefault();
 
@@ -604,17 +623,17 @@ document.getElementById('form-nuevo-juego').addEventListener('submit', async fun
     const { data: categoriaInsertada, error: errorInsert } = await client.from('categoria').insert([{
       nombre_categoria: nuevaCategoria
     }]).select();
-    
+
     if (errorInsert) {
       showAlert("Error al crear categoría: " + errorInsert.message, 'error', 3000);
       return;
     }
-    
+
     if (!categoriaInsertada || categoriaInsertada.length === 0) {
       showAlert("Error: No se pudo crear la categoría correctamente", 'error', 3000);
       return;
     }
-    
+
     idCategoria = categoriaInsertada[0].id_categoria;
     showAlert("Nueva categoría creada: " + nuevaCategoria, 'success', 2000);
   } else if (!categoriaSelect && !nuevaCategoria) {
@@ -649,10 +668,12 @@ document.getElementById('form-nuevo-juego').addEventListener('submit', async fun
   cargarJuegos();
 });
 
+// Inicialización
 cargarCategorias();
 mostrarUsuario();
 cargarNotificacionesUsuario();
 
+// Mostrar juego aleatorio
 async function juegoAleatorio() {
   const { data: juegos, error } = await client
     .from('juego')

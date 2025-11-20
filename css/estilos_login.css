@@ -74,7 +74,7 @@ html, body {
   box-sizing: border-box;
   border-width: 24px;
   border-style: solid;
-  border-image-source: url(/Gear-Studio/src/img/login_border.png);
+  border-image-source: url(/src/img/login_border.png);
   border-image-slice: 30 fill;
   border-image-repeat: stretch;
   background: linear-gradient(135deg, #D9976F, #C08B51);
@@ -362,7 +362,7 @@ html, body {
     background: linear-gradient(to bottom, #D9976F, #B8755E);
 }
 
-/* Media Queries - Responsive Design */
+/* Media Queries */
 @media (max-width: 1200px) {
     .panel-wrap {
         left: 60px;

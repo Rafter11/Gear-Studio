@@ -21,7 +21,7 @@
   font-family: 'FHACondensedFrench', "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
-/* RESET / LAYOUT BASE */
+/* RESET / BASE */
 * { box-sizing: border-box; }
 
 html, body {
@@ -30,7 +30,7 @@ html, body {
   height: 100%;
   font-family: var(--font-family);
   color: var(--text);
-  background: transparent; /* la página usa video de fondo */
+  background: transparent; /* Para no tapar el video */
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -38,7 +38,7 @@ html, body {
   z-index: 1;
 }
 
-/* VIDEO DE FONDO (ya presente en HTML) */
+/* VIDEO DE FONDO */
 #video-fondo {
   position: fixed;
   top: 0;
@@ -61,7 +61,7 @@ html, body {
   z-index: -1;
 }
 
-/* LOGO Y USUARIO (idénticos a la principal) */
+/* LOGO Y USUARIO */
 .logo-superior-izquierda {
   position: absolute;
   top: 13px;
@@ -135,7 +135,7 @@ html, body {
     color: #a36b00;
 }
 
-/* TITULO: adaptamos tu h1.titulo-pagina para que parezca el header de la principal */
+/* TITULO */
 .titulo-pagina {
   background: linear-gradient(to right, #A7623C, #C08B51);
   color: white;
@@ -146,10 +146,10 @@ html, body {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   z-index: 2;
   font-size: 30px;
-  margin: 0; /* elimina margenes por defecto del h1 */
+  margin: 0;
 }
 
-/* NAVBAR: idéntico a la principal */
+/* NAVBAR */
 nav {
   background: var(--inner);
   display: flex;
@@ -192,7 +192,7 @@ nav input {
   color: #111;
 }
 
-/* CONTENIDO PRINCIPAL: mantenemos tu estructura pero aplicamos un contenedor ancho como en principal */
+/* CONTENIDO PRINCIPAL */
 main {
   flex: 1;
   display: flex;
@@ -212,7 +212,7 @@ main h2 {
   margin-top: 0;
 }
 
-/* Grid de juegos - mantengo tus clases pero con estética similar a principal */
+/* Grid de juegos */
 .juegos-grid {
   width: 100%;
   max-width: 1200px;
@@ -224,7 +224,7 @@ main h2 {
   list-style: none;
 }
 
-/* tarjeta similar a .juego de la principal */
+/* Tarjeta */
 .juego-card {
   background: var(--panel);
   padding: 16px;
@@ -242,7 +242,7 @@ main h2 {
   margin-bottom: 8px;
 }
 
-/* PIE DE PÁGINA: idéntico a la principal */
+/* PIE DE PÁGINA */
 footer {
   background: linear-gradient(to right, #A7623C, #C08B51);
   color: white;
@@ -254,7 +254,7 @@ footer {
   z-index: 2;
 }
 
-/* MODAL: hacemos que tu modal sea igual al de la principal (clases coincidentes) */
+/* MODAL */
 .modal {
   display: none; /* se activa desde JS */
   position: fixed;
@@ -268,9 +268,9 @@ footer {
   align-items: center;
 }
 
-/* contenido del modal con el estilo de la principal */
+
 .modal-contenido {
-  background-color: var(--inner); /* fondo oscuro como en principal */
+  background-color: var(--inner);
   margin: 1% auto;
   padding: 20px;
   border-radius: 8px;
@@ -280,7 +280,7 @@ footer {
   overflow-y: auto;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
   font-family: var(--font-family);
-  color: #f0f0f0; /* texto claro para contraste con fondo oscuro */
+  color: #f0f0f0;
   position: relative;
 }
 
@@ -310,7 +310,6 @@ footer {
   margin-bottom: 10px;
 }
 
-/* inputs y labels dentro del modal compatibles con tu HTML */
 .modal-contenido label {
   display: block;
   margin-top: 15px;
@@ -334,7 +333,6 @@ footer {
   box-sizing: border-box;
 }
 
-/* boton guardar en modal */
 .modal-contenido button[type="submit"] {
   margin-top: 20px;
   width: 100%;
@@ -352,7 +350,6 @@ footer {
   background-color: #A7623C;
 }
 
-/* boton cerrar (X) */
 .cerrar {
   position: absolute;
   top: 10px;
@@ -407,7 +404,7 @@ footer {
   background-color: #A7623C;
 }
 
-/* Responsive ajustes */
+/* Media Queries */
 @media (max-width: 600px) {
   .filtros-biblioteca {
     flex-direction: column;
@@ -438,7 +435,7 @@ footer {
   background-color: #A7623C;
 }
 
-/* pequeños ajustes responsivos */
+/* Media Queries */
 @media (max-width: 600px) {
   nav button { font-size: 16px; padding: 8px 12px; }
   nav input { min-width: 120px; font-size: 16px; padding: 8px; }
@@ -446,7 +443,7 @@ footer {
   .usuario-superior-derecha { font-size: 18px; padding: 6px 10px; top: 20px; }
 }
 
-/* Correo de contacto flotante */
+/* Contacto */
 .contacto-flotante {
   position: fixed;
   bottom: 20px;
